@@ -1,0 +1,11 @@
+name: revtex-markdown-paper
+
+channels:
+- conda-forge
+
+dependencies:
+  - python
+  - pandoc
+  - pandoc-crossref
+  - pip:
+    - pandoc-fignos
