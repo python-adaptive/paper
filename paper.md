@@ -7,8 +7,7 @@ author:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
   email: not_anton@antonakhmerov.org
 abstract: |
-  Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-bibliography: references.bib
+  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. You supply a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.
 acknowledgements: |
   We'd like to thank ...
 contribution: |
