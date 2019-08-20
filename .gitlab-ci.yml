@@ -2,13 +2,7 @@ image: gitlab.kwant-project.org:5005/qt/adaptive-paper
 
 stages:
   - build-env
-  - build
   - test
-
-variables:
-  # rsync is used to send documentation to our web servers: we never send any
-  # secret information, and using 'ssh-keyscan' causes the CI server's IP to be blacklisted
-  IGNORE_HOSTKEY: "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 ## Building Docker environments
 ## Only runs when docker specifications change
@@ -26,7 +20,7 @@ variables:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
 
-build-env:ubuntu:
+build-env:ubuntu: &build-docker
   <<: *build-env
   only:
     changes:
@@ -38,45 +32,13 @@ build-env:ubuntu:
       --destination $CI_REGISTRY_IMAGE/ubuntu
 
 
-## Build Jobs
-
-build:ubuntu:
-  <<: *build
-  <<: *ubuntu_env
-
 ## Test Jobs
 
-check whitespace style:
-  stage: test
-  script: ./check_whitespace
-  allow_failure: true
-
-check for dependencies installed:
-  stage: test
-  script:
-    - if [ -d .eggs ]; then echo "$(ls -d .eggs/*/) downloaded by build, update build environment" >&2; fi
-  allow_failure: true
-
-
-.test: &test
-  stage: test
-  script:
-    - py.test -r w --flakes kwant --junitxml=tests.xml --durations=10
-  artifacts:
-    reports:
-      junit: tests.xml
-
 .make: &make
+  <<: *build-docker
   stage: test
   script:
     - make
   artifacts:
     paths:
-      - *pdf
-
-test:ubuntu:
-  <<: *test
-  <<: *ubuntu_env
-  dependencies:
-    - build:ubuntu
-
+      - paper.pdf
