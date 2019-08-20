@@ -34,7 +34,7 @@ build-env:ubuntu: &build-docker
 
 ## Test Jobs
 
-.make: &make
+make: &make
   <<: *build-docker
   stage: test
   script:
