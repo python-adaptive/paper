@@ -9,7 +9,10 @@ stages:
 
 .build-env: &build-env
   stage: build-env
-  when: manual
+  only:
+    changes:
+      - Dockerfile
+      - environment.yml
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -24,7 +27,8 @@ build-env:ubuntu: &build-docker
   <<: *build-env
   only:
     changes:
-      - docker/Dockerfile
+      - Dockerfile
+      - environment.yml
   script:
     - /kaniko/executor
       --context $CI_PROJECT_DIR/docker
