@@ -1,0 +1,82 @@
+image: gitlab.kwant-project.org:5005/qt/adaptive-paper
+
+stages:
+  - build-env
+  - build
+  - test
+
+variables:
+  # rsync is used to send documentation to our web servers: we never send any
+  # secret information, and using 'ssh-keyscan' causes the CI server's IP to be blacklisted
+  IGNORE_HOSTKEY: "ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+
+## Building Docker environments
+## Only runs when docker specifications change
+
+.build-env: &build-env
+  stage: build-env
+  when: manual
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  artifacts:
+    untracked: true
+    expire_in: 1 hour
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+
+build-env:ubuntu:
+  <<: *build-env
+  only:
+    changes:
+      - docker/Dockerfile
+  script:
+    - /kaniko/executor
+      --context $CI_PROJECT_DIR/docker
+      --dockerfile $CI_PROJECT_DIR/Dockerfile
+      --destination $CI_REGISTRY_IMAGE/ubuntu
+
+
+## Build Jobs
+
+build:ubuntu:
+  <<: *build
+  <<: *ubuntu_env
+
+## Test Jobs
+
+check whitespace style:
+  stage: test
+  script: ./check_whitespace
+  allow_failure: true
+
+check for dependencies installed:
+  stage: test
+  script:
+    - if [ -d .eggs ]; then echo "$(ls -d .eggs/*/) downloaded by build, update build environment" >&2; fi
+  allow_failure: true
+
+
+.test: &test
+  stage: test
+  script:
+    - py.test -r w --flakes kwant --junitxml=tests.xml --durations=10
+  artifacts:
+    reports:
+      junit: tests.xml
+
+.make: &make
+  stage: test
+  script:
+    - make
+  artifacts:
+    paths:
+      - *pdf
+
+test:ubuntu:
+  <<: *test
+  <<: *ubuntu_env
+  dependencies:
+    - build:ubuntu
+
