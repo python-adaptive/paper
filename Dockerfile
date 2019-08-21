@@ -1,7 +1,7 @@
 FROM continuumio/miniconda
 MAINTAINER Bas Nijholt <bas@nijho.lt>
 
-RUN apt-get -o Acquire::Check-Valid-Until=false --fix-missing update -q && apt-get install -qy \
+RUN apt-get update -q && apt-get install -qy \
 #    texlive-full \
 #    python-pygments gnuplot \
 	build-essential \
