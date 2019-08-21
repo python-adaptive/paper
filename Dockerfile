@@ -25,6 +25,7 @@ RUN apt-get update -q && apt-get install -qy \
     # texlive-full \
     python-pygments gnuplot \
     make git \
+    build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /environments
