@@ -13,6 +13,7 @@ stages:
     changes:
       - Dockerfile
       - environment.yml
+      - .gitlab-ci.yml
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
