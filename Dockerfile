@@ -1,4 +1,4 @@
-ubuntu:xenial
+FROM ubuntu:xenial
 MAINTAINER Bas Nijholt <bas@nijho.lt>
 
 ENV LANG=C.UTF-8 LC_ALL=C.UTF-8
