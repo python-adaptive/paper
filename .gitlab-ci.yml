@@ -31,7 +31,7 @@ build-env:ubuntu: &build-docker
       - environment.yml
   script:
     - /kaniko/executor
-      --context $CI_PROJECT_DIR/docker
+      --context $CI_PROJECT_DIR
       --dockerfile $CI_PROJECT_DIR/Dockerfile
       --destination $CI_REGISTRY_IMAGE/ubuntu
 
