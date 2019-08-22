@@ -36,7 +36,7 @@ The most significant advantage of these algorithms is that they allow for easy p
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has already been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
-It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and averaging stoachastic functions.
+It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stoachastic functions.
 Most of our algorithms allow for a customizable loss function.
 In this way one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
 It easily integrates with the Jupyter notebook environment and provides tools for trivially upscaling your simulation to a computational cluster, live-plotting and inspecting the data as the calculation is in progress, automatically saving and loading of the data, and more.
