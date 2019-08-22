@@ -37,6 +37,7 @@
 \newcommand{\kx}{k_x}
 \newcommand{\ky}{k_y}
 \newcommand{\meff}{m_\text{eff}}
+\newcommand{\R}{\mathbb{R}}
 
 \newcounter{CommentNumber}
 % \renewcommand{\paragraph}[1]{\stepcounter{CommentNumber}\belowpdfbookmark{#1}{\arabic{CommentNumber}}}

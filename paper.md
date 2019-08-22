@@ -7,7 +7,7 @@ author:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
   email: not_anton@antonakhmerov.org
 abstract: |
-  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. You supply a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.\cite{PhysRevB.81.155449}
+  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. You supply a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.
 acknowledgements: |
   We'd like to thank ...
 contribution: |
@@ -18,7 +18,7 @@ contribution: |
 
 #### Simulations are costly and often require sampling a region in parameter space.
 
-In the computational sciences, one often does costly simulations---represented by a function $f$---where a certain region in parameter space $X$ is sampled, $f \colon X \to Y$.
+In the computational sciences, one often does costly simulations---represented by a function $f$---where a certain region in parameter space $X$ is sampled, mapping to a codomain $Y$: $f \colon X \to Y$.
 Frequently, the different points in $X$ can be independently calculated.
 Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneous grid because of its simple implementation.
 
@@ -30,13 +30,16 @@ One of the most significant complications here is to parallelize this algorithm,
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous simple example.
-Here we associate a local *loss* with each of the *intervals* (containing neighboring points), and choose new points inside of the interval with the largest loss.
+Here we associate a *local loss* with each of the *intervals* (containing neighboring points), and choose new points inside of the interval with the largest loss.
 We can then easily quantify how well the data is describing the underlying function by summing all the losses; allowing us to define stopping criteria.
-The advantage of these algorithms is that they allow for easy parallelization and have a low computational overhead.
+The most significant advantage of these algorithms is that they allow for easy parallelization and have a low computational overhead.
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
-We provide a reference implementation, the open-source Python package called Adaptive.[@Nijholt2019a]
-
+We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has already been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
+It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and averaging stoachastic functions.
+Most of our algorithms allow for a customizable loss function.
+In this way one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
+It easily integrates with the Jupyter notebook environment and provides tools for trivially upscaling your simulation to a computational cluster, live-plotting and inspecting the data as the calculation is in progress, automatically saving and loading of the data, and more.
 
 # Review of adaptive sampling
 
