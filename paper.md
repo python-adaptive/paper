@@ -24,7 +24,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 A better alternative is to choose new, potentially interesting points in $X$ based on existing data, which improves the simulation efficiency.
-For example, a simple strategy for a one-dimensional function is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval, and (3) pick the new point to be in the middle of the largest Euclidean distance.
+For example, a simple sampling strategy for a one-dimensional function is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval, and (3) pick the new point to be in the middle of the largest Euclidean distance.
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
