@@ -1,3 +1,4 @@
+
 ---
 title:  'Adaptive, tools for adaptive parallel sampling of mathematical functions'
 journal: 'PeerJ'
@@ -17,20 +18,24 @@ contribution: |
 # Introduction
 
 #### Simulations are costly and often require sampling a region in parameter space.
-
 In the computational sciences, one often does costly simulations---represented by a function $f$---where a certain region in parameter space $X$ is sampled, mapping to a codomain $Y$: $f \colon X \to Y$.
 Frequently, the different points in $X$ can be independently calculated.
 Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneous grid because of its simple implementation.
 
 #### Choosing new points based on existing data improves the simulation efficiency.
-A better alternative is to choose new, potentially interesting points in $X$ based on existing data, which improves the simulation efficiency.
-For example, a simple sampling strategy for a one-dimensional function is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval, and (3) pick the new point to be in the middle of the largest Euclidean distance.
+<!-- This should convey the point that it is advantageous to do this. -->
+A better alternative is to choose new, potentially interesting points in $X$ based on existing data, which improves the simulation efficiency. <!-- cite i.e. hydrodynamics, Bayesian sampling -->
+With high cost simulations where one needs to find a minimum (or maximum) Baysian optimization works well.
+If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance. <!-- cite literature to support this claim that it's better, Mathematica and MATLAB maybe -->
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
-In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous simple example.
-Here we associate a *local loss* with each of the *intervals* (containing neighboring points), and choose new points inside of the interval with the largest loss.
+Due to parallelization the algorithm should be local, meaning the information updates are only in a region around the newly calculated point.
+Further, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
+For example, a simple sampling strategy for a one-dimensional function is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
+In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous mentioned example.
+Here we associate a *local loss* to each of the *candidate points* within a interval, and choose the points with the largest loss.
 We can then easily quantify how well the data is describing the underlying function by summing all the losses; allowing us to define stopping criteria.
 The most significant advantage of these algorithms is that they allow for easy parallelization and have a low computational overhead.
 
@@ -55,9 +60,11 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 # Design constraints and the general algorithm
 
 #### We aim to sample low dimensional low to intermediate cost functions in parallel.
+<!-- This should explain to which domain our problem belongs. -->
 <!-- because of the curse of dimensionality -->
 <!-- fast functions do not require adaptive -->
 <!-- When your function evaluation is very expensive, full-scale Bayesian sampling will perform better, however, there is a broad class of simulations that are in the right regime for Adaptive to be beneficial. -->
+
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 
@@ -94,6 +101,7 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 #### The `cquad` algorithm belongs to a class that is parallelizable.
 
 ## isosurface sampling
+<!-- figure here -->
 
 # Implementation and benchmarks
 <!-- API description -->
