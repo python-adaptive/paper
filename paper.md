@@ -26,7 +26,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 <!-- This should convey the point that it is advantageous to do this. -->
 A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e. hydrodynamics-->
 Baysian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance. [@mathematica_adaptive] <!-- cite literature to support this claim that it is better, Mathematica and MATLAB maybe -->
+If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive].
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
@@ -37,11 +37,11 @@ A simple example is greedily optimizing continuity of the sampling by selecting 
 For a one-dimensional function this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous mentioned example.
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
-We can then easily quantify how well the data is describing the underlying function by summing all the losses; allowing us to define stopping criteria.
+Using this loss we we can then quantify how well an interpolation of the data is describing the underlying function.
 The most significant advantage of these algorithms is that they allow for easy parallelization and have a low computational overhead.
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
-We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has already been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
+We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
 It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
 Most of our algorithms allow for a customizable loss function.
 In this way, one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
@@ -50,7 +50,11 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 # Review of adaptive sampling
 
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
-<!-- high dimensional functions -->
+Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.
+It works with many degrees of freedom and can consider constraints, for example, when the sample space contains settings that are practically infeasible.
+One form of OED is response-adaptive design, which concerns adaptive sampling designs for statistical experiments.
+Here the acquired data (i.e., the observations) are used to adjust the experiment as it is in process.
+In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
 <!-- can refer to Mathematica's implementation -->
