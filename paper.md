@@ -8,7 +8,14 @@ author:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
   email: not_anton@antonakhmerov.org
 abstract: |
-  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. One supplies a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.
+  Large scale computer simulations are time-consuming to run and often require sweeps over input parameters to obtain a qualitative understanding of the simulation output.
+  These sweeps of parameters can potentially make the simulations prohibitively expensive.
+  Therefore, when evaluating a function numerically, it is advantageous to sample it more densely in the interesting regions (called adaptive sampling) instead of evaluating it on a manually-defined homogeneous grid.
+  Such adaptive algorithms exist within the machine learning field.
+  These mehods can suggest a new point to calculate based on \textit{all} existing data at that time; however, this is an expensive operation.
+  An alternative is to use local algorithms---in contrast to the previously mentioned global algorithms---which can suggest a new point, based only on the data in the immediate vicinity of a new point.
+  This approach works well, even when using hundreds of computers simultaneously because the point suggestion algorithm is cheap (fast) to evaluate.
+  We provide a reference implementation and show its performance.
 acknowledgements: |
   We'd like to thank ...
 contribution: |
