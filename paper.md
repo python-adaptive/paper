@@ -8,7 +8,7 @@ author:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
   email: not_anton@antonakhmerov.org
 abstract: |
-  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. You supply a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.
+  Adaptive is an open-source Python library designed to make adaptive parallel function evaluation simple. One supplies a function with its bounds and it will be evaluated at the optimal points in parameter space by analyzing existing data and planning ahead on the fly. With just a few lines of code, you can evaluate functions on a computing cluster, live-plot the data as it returns, and benefit from a significant speedup.
 acknowledgements: |
   We'd like to thank ...
 contribution: |
@@ -24,27 +24,28 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-A better alternative is to choose new, potentially interesting points in $X$ based on existing data, which improves the simulation efficiency. <!-- cite i.e. hydrodynamics, Bayesian sampling -->
-With high cost simulations where one needs to find a minimum (or maximum) Baysian optimization works well.
-If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance. <!-- cite literature to support this claim that it's better, Mathematica and MATLAB maybe -->
+A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active]<!-- cite i.e. hydrodynamics, Bayesian sampling -->
+Baysian optimization works well for high-cost simulations where one needs to find a minimum (or maximum).
+If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance. <!-- cite literature to support this claim that it is better, Mathematica and MATLAB maybe -->
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
-Due to parallelization the algorithm should be local, meaning the information updates are only in a region around the newly calculated point.
-Further, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
-For example, a simple sampling strategy for a one-dimensional function is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
+Due to parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
+Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
+A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values.
+For a one-dimensional function this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous mentioned example.
-Here we associate a *local loss* to each of the *candidate points* within a interval, and choose the points with the largest loss.
+Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
 We can then easily quantify how well the data is describing the underlying function by summing all the losses; allowing us to define stopping criteria.
 The most significant advantage of these algorithms is that they allow for easy parallelization and have a low computational overhead.
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has already been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
-It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stoachastic functions.
+It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
 Most of our algorithms allow for a customizable loss function.
-In this way one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
-It easily integrates with the Jupyter notebook environment and provides tools for trivially upscaling your simulation to a computational cluster, live-plotting and inspecting the data as the calculation is in progress, automatically saving and loading of the data, and more.
+In this way, one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
+It easily integrates with the Jupyter notebook environment and provides tools for trivially upscaling a simulation to a computational cluster, live-plotting and inspecting the data as the calculation is in progress, automatically saving and loading of the data, and more.
 
 # Review of adaptive sampling
 
@@ -63,7 +64,7 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 <!-- This should explain to which domain our problem belongs. -->
 <!-- because of the curse of dimensionality -->
 <!-- fast functions do not require adaptive -->
-<!-- When your function evaluation is very expensive, full-scale Bayesian sampling will perform better, however, there is a broad class of simulations that are in the right regime for Adaptive to be beneficial. -->
+<!-- When your function evaluation is very expensive, full-scale Bayesian sampling will perform better; however, there is a broad class of simulations that are in the right regime for Adaptive to be beneficial. -->
 
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
