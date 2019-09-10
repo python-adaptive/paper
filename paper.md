@@ -95,6 +95,7 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 ## Line simplification loss
 
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
+Inspired by a method commonly employed in digital cartography for coast line simplification, we construct a loss function that does its reverse. [@visvalingam1990douglas]
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
 ## A parallelizable adaptive integration algorithm based on cquad
