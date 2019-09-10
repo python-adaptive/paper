@@ -50,9 +50,9 @@ It easily integrates with the Jupyter notebook environment and provides tools fo
 # Review of adaptive sampling
 
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
-Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.
+Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.[@emery1998optimal]
 It works with many degrees of freedom and can consider constraints, for example, when the sample space contains settings that are practically infeasible.
-One form of OED is response-adaptive design, which concerns adaptive sampling designs for statistical experiments.
+One form of OED is response-adaptive design[@hu2006theory], which concerns adaptive sampling designs for statistical experiments.
 Here the acquired data (i.e., the observations) are used to adjust the experiment as it is in process.
 In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
 
