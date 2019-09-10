@@ -59,13 +59,12 @@ In a typical non-adaptive experiment, decisions on how to sample are made and fi
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a function in between bounds requires one to evaluate the function on sufficiently many points such that when neighboring points are connected, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of points, one can use adaptive sampling routines.
-For example, for one-dimensional functions, Mathematica implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily.
+For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value or we can use it to plot the function without specifying a grid.
 Another application for adaptive sampling is integration.
 The `CQUAD` doubly-adaptive integration algorithm[@gonnet2010increasing] in the GNU Scientific Library[@galassi1996gnu] is a general-purpose integration routine which can handle most types of singularities.
 In general, it requires more function evaluations than the integration routines in `QUADPACK`[@galassi1996gnu]; however, it works more often for difficult integrands.
-It is doubly-adaptive because it calculates errors for each interval and can either split up intervals into more intervals or add more points to each interval.
-<!-- can refer to Mathematica's implementation -->
+It is doubly-adaptive because it calculates errors for each interval and can then decide to either split up intervals into more intervals or add more points to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
 <!-- hydrodynamics anisotropic meshing paper ref -->
