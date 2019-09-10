@@ -15,7 +15,7 @@ abstract: |
   These mehods can suggest a new point to calculate based on \textit{all} existing data at that time; however, this is an expensive operation.
   An alternative is to use local algorithms---in contrast to the previously mentioned global algorithms---which can suggest a new point, based only on the data in the immediate vicinity of a new point.
   This approach works well, even when using hundreds of computers simultaneously because the point suggestion algorithm is cheap (fast) to evaluate.
-  We provide a reference implementation and show its performance.
+  We provide a reference implementation in Python and show its performance.
 acknowledgements: |
   We'd like to thank ...
 contribution: |
@@ -41,11 +41,13 @@ One of the most significant complications here is to parallelize this algorithm,
 Due to parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
 Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values.
-For a one-dimensional function this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
+For a one-dimensional function (Fig. @fig:loss_1D) this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous mentioned example.
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
 In the case of the integration algorithm the loss could just be an error estimate.
 The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
+
+![Visualization of point choosing algorithm for a blackbox function (grey). The existing data points (green) $\{x_i, y_i\}_{i \in 1...4}$ and corresponding candidate points (red) in the middle of each interval. Each candidate point has a loss $L$ indicated by the size of the red dots. The candidate point with the largest loss will be chosen which in this case is the one with $L_{1,2}$.](figures/loss_1D.pdf){#fig:loss_1D}
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
