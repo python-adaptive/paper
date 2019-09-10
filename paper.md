@@ -50,7 +50,7 @@ The most significant advantage of these *local* algorithms is that they allow fo
 ![Visualization of the point choosing algorithm for a blackbox function (grey).
 The existing data points (green) $\{x_i, y_i\}_{i \in 1...4}$ and corresponding candidate points (red) in the middle of each interval.
 Each candidate point has a loss $L$ indicated by the size of the red dots.
-The candidate point with the largest loss will be chosen which in this case is the one with $L_{1,2}$.
+The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
 ](figures/loss_1D.pdf){#fig:loss_1D}
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
