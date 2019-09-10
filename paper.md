@@ -47,7 +47,7 @@ Here we associate a *local loss* to each of the *candidate points* within an int
 In the case of the integration algorithm the loss could just be an error estimate.
 The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
 
-![Visualization of the point choosing algorithm for a blackbox function (grey).
+![Visualization of a simple point choosing algorithm for a blackbox function (grey).
 The existing data points (green) $\{x_i, y_i\}_{i \in 1...4}$ and corresponding candidate points (red) in the middle of each interval.
 Each candidate point has a loss $L$ indicated by the size of the red dots.
 The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
