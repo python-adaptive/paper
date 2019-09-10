@@ -42,10 +42,10 @@ The most significant advantage of these algorithms is that they allow for easy p
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
-It has algorithms for: $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
-Most of our algorithms allow for a customizable loss function.
-In this way, one can adapt the sampling algorithm to work optimally for a specific function codomain $Y$.
-It easily integrates with the Jupyter notebook environment and provides tools for trivially upscaling a simulation to a computational cluster, live-plotting and inspecting the data as the calculation is in progress, automatically saving and loading of the data, and more.
+It has algorithms for $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
+Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for a specific function.
+It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
+It provides auxiliary functionality such as live-plotting, inspecting the data as the calculation is in progress, and automatically saving and loading of the data.
 
 # Review of adaptive sampling
 
@@ -57,6 +57,7 @@ Here the acquired data (i.e., the observations) are used to adjust the experimen
 In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
+
 <!-- can refer to Mathematica's implementation -->
 
 #### PDE solvers and computer graphics use adaptive meshing.
