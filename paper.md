@@ -57,7 +57,7 @@ Here the acquired data (i.e., the observations) are used to adjust the experimen
 In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
-Plotting a function in between bounds requires one to evaluate the function on sufficiently many points such that when neighboring points are connected, we get an accurate description of the function values that were not explicitly calculated.
+Plotting a function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of points, one can use adaptive sampling routines.
 For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value or we can use it to plot the function without specifying a grid.
