@@ -73,27 +73,31 @@ This is not a systematic review of all these fields, but rather, we aim to ident
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
 Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.[@emery1998optimal]
 It works with many degrees of freedom and can consider constraints, for example, when the sample space contains settings that are practically infeasible.
-One form of OED is response-adaptive design[@hu2006theory], which concerns adaptive sampling designs for statistical experiments.
-Here, the acquired data (i.e., the observations) are used to adjust the experiment as it is in process.
-In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
-<!-- more details on HOW it works. -->
+One form of OED is response-adaptive design[@hu2006theory], which concerns the adaptive sampling of designs for statistical experiments.
+Here, the acquired data (i.e., the observations) are used to estimate the uncertainties of a certain desired parameter.
+Then it suggests further experiments that will optimally reduce these uncertainties.
+In this step of the calculation Bayesian statistics is frequently used.
+Since Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed from solutions Markov chain Monte Carlo (MCMC) sampling is the goto tool in determining the most promising samples.
+In a typical non-adaptive experiment, decisions on experiments are done, are made and fixed in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
-In order to minimize the number of points, one can use adaptive sampling routines.
+In order to minimize the number of function evaluations, one can use adaptive sampling routines.
 For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily; however, details on the algorithm are not published.
-Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value or we can use it to plot the function without specifying a grid.
+Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value, or we can use it to plot the function without specifying a grid.
 Another application for adaptive sampling is integration.
-The `CQUAD` doubly-adaptive integration algorithm[@gonnet2010increasing] in the GNU Scientific Library[@galassi1996gnu] is a general-purpose integration routine which can handle most types of singularities.
+It works by estimating integration error of each interval and then minimizing the sum of these errors greedily.
+For example, the `CQUAD` algorithm[@gonnet2010increasing] in the GNU Scientific Library[@galassi1996gnu] implements a more shophisticated strategy and is a doubly-adaptive general-purpose integration routine which can handle most types of singularities.
 In general, it requires more function evaluations than the integration routines in `QUADPACK`[@galassi1996gnu]; however, it works more often for difficult integrands.
-It is doubly-adaptive because it calculates errors for each interval and can then decide to either split up intervals into more intervals or add more points---that do not lie on a regular grid---to each interval.
+It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by adding more points---that do not lie on a regular grid---to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
-Hydrodynamics[@berger1989local] and astrophysics[@klein1999star] use an adaptive technique called adaptive mesh refinement, which can be used to solve partial differential equations (PDEs)[@berger1984adaptive].
-It is a method of adapting the accuracy of a solution dynamically within certain turbulent regions of the simulation domain while the calculation is in progress.
+Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use adaptive refinement of the triangulation mesh at which a partial differential equation is discretized.
+By providing smaller mesh elements in regions with higher variation of the function, they reduce the amount of data and calculation needed at each step of time propagation.
+The remeshing at each time step happens globally, which is an expensive operation.
+Therefore mesh optimization does not fit our workflow because expensive global updates should be avoided.
 Computer graphics uses similar adaptive methods where a surface can be represented by a smooth surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
 An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field, this is called anisotropic meshing[@alliez2003anisotropic].
-
 
 # Design constraints and the general algorithm
 
