@@ -53,6 +53,10 @@ Each candidate point has a loss $L$ indicated by the size of the red dots.
 The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
 ](figures/loss_1D.pdf){#fig:loss_1D}
 
+![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red).
+We see that when the function has a distince feature---such as with the peak and tanh---adaptive sampling performs much better.
+When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/adaptive_vs_grid.pdf){#fig:adaptive_vs_grid}
+
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
 It has algorithms for $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
