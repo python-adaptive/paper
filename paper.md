@@ -95,7 +95,7 @@ It is doubly-adaptive because it can decide to either subdivide intervals into m
 Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use adaptive refinement of the triangulation mesh at which a partial differential equation is discretized.
 By providing smaller mesh elements in regions with a higher variation of the function, they reduce the amount of data and calculation needed at each step of time propagation.
 The remeshing at each time step happens globally and this is an expensive operation.
-Therefore mesh, optimization does not fit our workflow because expensive global updates should be avoided.
+Therefore, mesh optimization does not fit our workflow because expensive global updates should be avoided.
 Computer graphics uses similar adaptive methods where a surface can be represented by a smooth surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
 An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field, this is called anisotropic meshing[@alliez2003anisotropic].
 
