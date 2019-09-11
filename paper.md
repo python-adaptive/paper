@@ -1,4 +1,3 @@
-
 ---
 title:  'Adaptive, tools for adaptive parallel sampling of mathematical functions'
 journal: 'PeerJ'
@@ -102,6 +101,11 @@ An example of such a polygonal remeshing method is one where the polygons align 
 # Design constraints and the general algorithm
 
 #### We aim to sample low dimensional low to intermediate cost functions in parallel.
+The general algorithm that we describe in this paper works best for low to intermediary cost functions.
+The point suggestion step needs to happen in a single sequential process while the function execution can happen in parallel.
+This means that $t_lobal}> t_\textrm{function} / N_\textrm{parallel workers} > t_\textrm{to suggest}$, in order to benefit from our adaptive sampling algorithm.
+Very fast functions can be calculated on a dense grid; however, extremely slow functions might benefit from full Bayesian optimization, nonetheless a large class of functions is inside the right regime.
+Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted.
 <!-- This should explain to which domain our problem belongs. -->
 <!-- because of the curse of dimensionality -->
 <!-- fast functions do not require adaptive -->
