@@ -70,7 +70,7 @@ Here, the acquired data (i.e., the observations) are used to adjust the experime
 In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
-Plotting a function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
+Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of points, one can use adaptive sampling routines.
 For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value or we can use it to plot the function without specifying a grid.
@@ -80,7 +80,11 @@ In general, it requires more function evaluations than the integration routines 
 It is doubly-adaptive because it calculates errors for each interval and can then decide to either split up intervals into more intervals or add more points to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
-<!-- hydrodynamics anisotropic meshing paper ref -->
+Hydrodynamics[@berger1989local] and astrophysics[@klein1999star] use an adaptive technique called adaptive mesh refinement, which can be used to solve partial differential equations (PDEs)[@berger1984adaptive].
+It is a method of adapting the accuracy of a solution dynamically within certain turbulent regions of the simulation domain while the calculation is in progress.
+Computer graphics uses similar adaptive methods where a surface can be represented by a smooth surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
+An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field, this is called anisotropic meshing[@alliez2003anisotropic].
+
 
 # Design constraints and the general algorithm
 
