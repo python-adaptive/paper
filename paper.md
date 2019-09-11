@@ -66,22 +66,27 @@ It provides auxiliary functionality such as live-plotting, inspecting the data a
 
 # Review of adaptive sampling
 
+Optimal sampling and planning based on data is a mature field with different communities providing their own context, restrictions, and algorithms to solve their problems.
+To explain the relation of our approach with prior work, we discuss several existing contexts.
+This is not a systematic review of all these fields, but rather, we aim to identify the important traits and design considerations.
+
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
 Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.[@emery1998optimal]
 It works with many degrees of freedom and can consider constraints, for example, when the sample space contains settings that are practically infeasible.
 One form of OED is response-adaptive design[@hu2006theory], which concerns adaptive sampling designs for statistical experiments.
 Here, the acquired data (i.e., the observations) are used to adjust the experiment as it is in process.
 In a typical non-adaptive experiment, decisions on how to sample are made and fixed in advance.
+<!-- more details on HOW it works. -->
 
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of points, one can use adaptive sampling routines.
-For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily.
+For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densily; however, details on the algorithm are not published.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value or we can use it to plot the function without specifying a grid.
 Another application for adaptive sampling is integration.
 The `CQUAD` doubly-adaptive integration algorithm[@gonnet2010increasing] in the GNU Scientific Library[@galassi1996gnu] is a general-purpose integration routine which can handle most types of singularities.
 In general, it requires more function evaluations than the integration routines in `QUADPACK`[@galassi1996gnu]; however, it works more often for difficult integrands.
-It is doubly-adaptive because it calculates errors for each interval and can then decide to either split up intervals into more intervals or add more points to each interval.
+It is doubly-adaptive because it calculates errors for each interval and can then decide to either split up intervals into more intervals or add more points---that do not lie on a regular grid---to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
 Hydrodynamics[@berger1989local] and astrophysics[@klein1999star] use an adaptive technique called adaptive mesh refinement, which can be used to solve partial differential equations (PDEs)[@berger1984adaptive].
