@@ -52,7 +52,7 @@ Each candidate point has a loss $L$ indicated by the size of the red dots.
 The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
 ](figures/loss_1D.pdf){#fig:loss_1D}
 
-![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red).
+![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
 We see that when the function has a distince feature---such as with the peak and tanh---adaptive sampling performs much better.
 When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/adaptive_vs_grid.pdf){#fig:adaptive_vs_grid}
 
@@ -114,7 +114,10 @@ The local loss function values then serve as a criterion for choosing the next p
 This means that upon adding new data points only the intervals near the new point needs to have their loss value updated.
 
 #### As an example the interpoint distance is a good loss function in one dimension.
-<!-- Plot here -->
+An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
+This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
+A more complex loss function that also takes the first neighboring intervals into account, is one that adds more points where the second derivative (or curvature) is the highest.
+Figure @fig:adaptive_vs_grid shows a comparison between this loss and a function that is sampled on a grid.
 
 #### In general local loss functions only have a logarithmic overhead.
 
