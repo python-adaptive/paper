@@ -102,14 +102,18 @@ An example of such a polygonal remeshing method is one where the polygons align 
 
 #### We aim to sample low dimensional low to intermediate cost functions in parallel.
 The general algorithm that we describe in this paper works best for low to intermediary cost functions.
-The point suggestion step happens in a single sequential process while the function execution can happen in parallel.
-This means that $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$, in order to benefit from our adaptive sampling algorithm.
-Very fast functions can be calculated on a dense grid and extremely slow functions might benefit from full scale Bayesian optimization, nonetheless a large class of functions is inside the right regime for Adaptive to be beneficial.
+The point suggestion step happens in a single sequential process while the function executions can be in parallel.
+This means that to benefit from an adaptive sampling algorithm $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$ must hold, here $t_\textrm{function}$ is the average function execution time, $N_\textrm{workers}$ the number of parallel processes, and $t_\textrm{suggest}$ the time it takes to suggest a new point.
+Very fast functions can be calculated on a dense grid and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large, nonetheless, a large class of functions is inside the right regime for Adaptive to be beneficial.
 Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
+To minimize $t_\textrm{suggest}$ and equivalently make the point suggestion algorithm as fast as possible, we propose to assign a loss to each interval.
+This loss is determined only by the function values of the points inside that interval and optionally of its neighboring intervals too.
+The local loss function values then serve as a criterion for choosing the next point by the virtue of choosing a new candidate point inside the interval with the maximum loss.
+This means that upon adding new data points only the intervals near the new point needs to have their loss value updated.
 
-#### As an example interpoint distance is a good loss function in one dimension.
+#### As an example the interpoint distance is a good loss function in one dimension.
 <!-- Plot here -->
 
 #### In general local loss functions only have a logarithmic overhead.
