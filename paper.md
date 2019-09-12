@@ -104,13 +104,8 @@ An example of such a polygonal remeshing method is one where the polygons align 
 The general algorithm that we describe in this paper works best for low to intermediary cost functions.
 The point suggestion step happens in a single sequential process while the function execution can happen in parallel.
 This means that $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$, in order to benefit from our adaptive sampling algorithm.
-Very fast functions can be calculated on a dense grid and extremely slow functions might benefit from full Bayesian optimization, nonetheless a large class of functions is inside the right regime.
-Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted.
-<!-- This should explain to which domain our problem belongs. -->
-<!-- because of the curse of dimensionality -->
-<!-- fast functions do not require adaptive -->
-<!-- When your function evaluation is very expensive, full-scale Bayesian sampling will perform better; however, there is a broad class of simulations that are in the right regime for Adaptive to be beneficial. -->
-
+Very fast functions can be calculated on a dense grid and extremely slow functions might benefit from full scale Bayesian optimization, nonetheless a large class of functions is inside the right regime for Adaptive to be beneficial.
+Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 
