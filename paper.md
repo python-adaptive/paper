@@ -128,8 +128,16 @@ A more complex loss function that also takes the first neighboring intervals int
 Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### In general local loss functions only have a logarithmic overhead.
+<!-- Bas: not sure what to write here -->
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
+<!-- Bas: the text below doesn't really describe what's written above, but is an essential part nonetheless -->
+So far, the description of the general algorithm did not include parallelism.
+It needs to be able to suggest multiple points at the same time and remember which points it suggests.
+When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
+A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created intervals until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neigbors})$ of these new intervals, where $L \ge L_\textrm{temp}$.
+For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbors of $x_\textrm{new}$ and assign the interpolated value to $y_\textrm{new}$ until it is known.
+When querying $n>1$ points, the former procedure simply repeats $n$ times.
 
 # Loss function design
 
