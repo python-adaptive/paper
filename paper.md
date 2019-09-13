@@ -40,7 +40,12 @@ One of the most significant complications here is to parallelize this algorithm,
 Due to parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
 Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values.
-For a one-dimensional function (Fig. @fig:loss_1D) this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
+For a one-dimensional function with three points known (its boundary points and a point in the center), the following steps repeat itself:
+(1) keep all points $x$ sorted, where two consecutive points define an interval,
+(2) calculate the Euclidean distance for each interval (see $L_{1,2}$ in Fig. @fig:loss_1D),
+(3) pick a new point $x_\textrm{new}$ in the middle of the largest interval, creating two new intervals around that point,
+(4) calculate $f(x_\textrm{new})$,
+(5) repeat the previous steps, without redoing calculations for unchanged intervals.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previously mentioned example.
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
 In the case of the integration algorithm, the loss is the error estimate.
