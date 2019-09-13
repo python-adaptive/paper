@@ -67,8 +67,7 @@
 % workaround for https://github.com/jgm/pandoc/issues/4716
 \newcommand{\passthrough}[1]{\lstset{mathescape=false}#1\lstset{mathescape=true}}
 
-\usepackage{xcolor}
-
+% listing settings, from https://tex.stackexchange.com/a/179956
 \lstset{
     basicstyle=\ttfamily,
     numbers=left,
@@ -88,7 +87,7 @@
     breakatwhitespace=true,
     breakautoindent=true,
     escapeinside={\%*}{*)},
-    linewidth=0.9\textwidth,
+    linewidth=\columnwidth,
     basewidth=0.5em,
 }
 
