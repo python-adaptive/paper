@@ -57,6 +57,10 @@ We see that when the function has a distinct feature---such as with the peak and
 When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/adaptive_vs_grid.pdf){#fig:adaptive_vs_grid}
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
+On the left is a circle with a linear background $x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
+In the middle a topological phase diagram from [\onlinecite{nijholt2016orbital}] its function can be -1 or 1, which indicate the presence or abscence of a Majorana bound state.
+On the right we plot level crossings for a two level quantum system.
+In all cases using Adaptive results in a better plot.
 ](figures/adaptive_2D.pdf){#fig:adaptive_2D}
 
 
@@ -121,7 +125,7 @@ This means that upon adding new data points, only the intervals near the new poi
 An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
 This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
 A more complex loss function that also takes the first neighboring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
-Figure @fig:adaptive_vs_grid shows a comparison between this loss and a function that is sampled on a grid.
+Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### In general local loss functions only have a logarithmic overhead.
 
