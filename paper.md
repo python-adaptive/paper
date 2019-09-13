@@ -204,7 +204,7 @@ from adaptive import Runner
 runner = Runner(learner, goal)
 ```
 This will return immediately as the calculation happens in the background.
-That also means that as the calculation is in progress `learner.data` can be inspected and be plotted with `learner.plot()`.
+That also means that as the calculation is in progress `learner.data` plotted with `learner.plot()`.
 Additionally, in a Jupyter notebook environment, one can call `runner.live_info()` to display useful information.
 To change the loss function ...
 
