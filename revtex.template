@@ -2,7 +2,7 @@
 \pdfoutput=1
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
-\usepackage{verbatim}
+\usepackage{listings}
 \usepackage{units}
 \usepackage{mathtools}
 \usepackage{amsmath}
@@ -63,6 +63,9 @@
 
 % workaround for https://github.com/jgm/pandoc/issues/2392#issuecomment-140114736
 \renewcommand{\citep}{\cite}
+
+% workaround for https://github.com/jgm/pandoc/issues/4716
+\newcommand{\passthrough}[1]{\lstset{mathescape=false}#1\lstset{mathescape=true}}
 
 \begin{document}
 
