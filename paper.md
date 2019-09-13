@@ -146,12 +146,9 @@ When querying $n>1$ points, the former procedure simply repeats $n$ times.
 <!-- example of distance loss on singularities -->
 ```python
 from adaptive import Learner1D, Runner
-from module import complicated_function
+from module import complicated_function as f
 
-learner = Learner1D(
-	complicated_function,
-	bounds=(-1, 1),
-)
+learner = Learner1D(f, bounds=(-1, 1))
 
 def goal(learner):
 	return learner.loss() < 0.01
