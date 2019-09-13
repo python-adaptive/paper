@@ -120,6 +120,7 @@ To minimize $t_\textrm{suggest}$ and equivalently make the point suggestion algo
 This loss is determined only by the function values of the points inside that interval and optionally of its neighboring intervals too.
 The local loss function values then serve as a criterion for choosing the next point by virtue of choosing a new candidate point inside the interval with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
+The amortized complexity of the point suggestion algorithm is therefore $\mathcal{O}(1)$.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
