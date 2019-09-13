@@ -144,6 +144,10 @@ When querying $n>1$ points, the former procedure simply repeats $n$ times.
 
 #### A failure mode of such algorithms is sampling only a small neighborhood of one point.
 <!-- example of distance loss on singularities -->
+```python
+import adaptive
+
+```
 
 #### A solution is to regularize the loss such that this would be avoided.
 <!-- like resolution loss which limits the size of an interval -->
