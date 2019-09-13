@@ -144,7 +144,7 @@ When querying $n>1$ points, the above procedure simply repeats $n$ times.
 
 #### A failure mode of such algorithms is sampling only a small neighbourhood of one point.
 The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
-For example, $1/x^2$ has a singularity will be sampled too densely around $x=0$ using this loss.
+For example, $1/x^2$ has a singularity and will be sampled too densely around $x=0$ using this loss.
 We can avoid this by defining additional logic inside the loss function.
 
 #### A solution is to regularize the loss such that this would be avoided.
