@@ -117,56 +117,35 @@ Further, because of the curse of dimensionality---the sparsity of space in highe
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 To minimize $t_\textrm{suggest}$ and equivalently make the point suggestion algorithm as fast as possible, we propose to assign a loss to each interval.
-This loss is determined only by the function values of the points inside that interval and optionally of its neighboring intervals too.
+This loss is determined only by the function values of the points inside that interval and optionally of its neighbouring intervals too.
 The local loss function values then serve as a criterion for choosing the next point by virtue of choosing a new candidate point inside the interval with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
-The amortized complexity of the point suggestion algorithm is therefore $\mathcal{O}(1)$.
+The amortized complexity of the point suggestion algorithm is, therefore, $\mathcal{O}(1)$.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
 This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
-A more complex loss function that also takes the first neighboring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
+A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### In general local loss functions only have a logarithmic overhead.
 <!-- Bas: not sure what to write here -->
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
-<!-- Bas: the text below doesn't really describe what's written above, but is an essential part nonetheless -->
+<!-- Bas: the text below does not really describe what is written above, but is an essential part nonetheless -->
 So far, the description of the general algorithm did not include parallelism.
 It needs to be able to suggest multiple points at the same time and remember which points it suggests.
 When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
 A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created intervals until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neigbors})$ of these new intervals, where $L \ge L_\textrm{temp}$.
-For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbors of $x_\textrm{new}$ and assign the interpolated value to $y_\textrm{new}$ until it is known.
-When querying $n>1$ points, the former procedure simply repeats $n$ times.
+For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assign the interpolated value to $y_\textrm{new}$ until it is known.
+When querying $n>1$ points, the above procedure simply repeats $n$ times.
 
 # Loss function design
 
-#### A failure mode of such algorithms is sampling only a small neighborhood of one point.
-<!-- example of distance loss on singularities -->
-```python
-from adaptive import Learner1D, Runner
-from module import complicated_function as f
-
-learner = Learner1D(f, bounds=(-1, 1))
-
-def goal(learner):
-	return learner.loss() < 0.01
-
-runner = Runner(learner, goal)
-```
-
-```python
-def default_loss(xs, ys):
-    dx = xs[1] - xs[0]
-    dy = ys[1] - ys[0]
-    return numpy.hypot(dx, dy)
-
-def uniform_loss(xs, ys):
-    dx = xs[1] - xs[0]
-    return dx
-
-```
+#### A failure mode of such algorithms is sampling only a small neighbourhood of one point.
+The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
+For example, $1/x^2$ has a singularity will be sampled too densely around $x=0$ using this loss.
+We can avoid this by defining additional logic inside the loss function.
 
 #### A solution is to regularize the loss such that this would be avoided.
 <!-- like resolution loss which limits the size of an interval -->
@@ -193,8 +172,53 @@ Inspired by a method commonly employed in digital cartography for coastline simp
 <!-- figure here -->
 
 # Implementation and benchmarks
-<!-- API description -->
+We will now introduce Adaptive's API.
+The object that can suggest points based on existing data is called a *learner*.
+When the function value is known, we can add it to the learner's data structure, such that it can suggest more interesting points later.
+We can define a learner as follows
+```python
+from adaptive import Learner1D
 
+def peak(x): # pretend this is a slow function
+    a = 0.01
+    return x + a**2 / (a**2 + x**2)
+
+learner = Learner1D(peak, bounds=(-1, 1))
+
+```
+To drive the learner manually (not recommended) and sequentially, we can do
+```python
+def goal(learner):
+    # learner.loss() = max(learner.losses)
+    return learner.loss() < 0.01
+
+while not goal(learner):
+    points, loss_improvements = learner.ask(n=1)
+    for x in points:  # len(points) == 1
+        y = f(x)
+        learner.tell(x, y)
+```
+To do this automatically (recommended) and in parallel (by default on all cores available)
+```python
+from adaptive import Runner
+runner = Runner(learner, goal)
+```
+This will return immediately as the calculation happens in the background.
+That also means that as the calculation is in progress `learner.data` can be inspected and be plotted with `learner.plot()`.
+Additionally, in a Jupyter notebook environment, one can call `runner.live_info()` to display useful information.
+To change the loss function ...
+
+```python
+def default_loss(xs, ys):
+    dx = xs[1] - xs[0]
+    dy = ys[1] - ys[0]
+    return numpy.hypot(dx, dy)
+
+def uniform_loss(xs, ys):
+    dx = xs[1] - xs[0]
+    return dx
+
+```
 #### The learner abstracts a loss based priority queue.
 
 #### The runner orchestrates the function evaluation.
