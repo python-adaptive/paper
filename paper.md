@@ -30,9 +30,9 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e. hydrodynamics-->
-Baysian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a contineous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive].
+A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e., hydrodynamics-->
+Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
+If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive].
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
@@ -41,20 +41,24 @@ Due to parallelization, the algorithm should be local, meaning that the informat
 Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values.
 For a one-dimensional function (Fig. @fig:loss_1D) this is to (1) construct intervals containing neighboring data points, (2) calculate the Euclidean distance of each interval and assign it to the candidate point inside that interval, and finally (3) pick the candidate point with the largest Euclidean distance.
-In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previous mentioned example.
+In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previously mentioned example.
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
-In the case of the integration algorithm the loss could just be an error estimate.
+In the case of the integration algorithm, the loss is the error estimate.
 The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
 
-![Visualization of a simple point choosing algorithm for a blackbox function (grey).
+![Visualization of a simple point choosing algorithm for a black box function (grey).
 The existing data points (green) $\{x_i, y_i\}_{i \in 1...4}$ and corresponding candidate points (red) in the middle of each interval.
 Each candidate point has a loss $L$ indicated by the size of the red dots.
 The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
 ](figures/loss_1D.pdf){#fig:loss_1D}
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
-We see that when the function has a distince feature---such as with the peak and tanh---adaptive sampling performs much better.
+We see that when the function has a distinct feature---such as with the peak and tanh---adaptive sampling performs much better.
 When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/adaptive_vs_grid.pdf){#fig:adaptive_vs_grid}
+
+![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
+](figures/adaptive_2D.pdf){#fig:adaptive_2D}
+
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
@@ -91,12 +95,12 @@ In general, it requires more function evaluations than the integration routines 
 It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by adding more points---that do not lie on a regular grid---to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
-Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use adaptive refinement of the triangulation mesh at which a partial differential equation is discretized.
+Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use an adaptive refinement of the triangulation mesh at which a partial differential equation is discretized.
 By providing smaller mesh elements in regions with a higher variation of the function, they reduce the amount of data and calculation needed at each step of time propagation.
-The remeshing at each time step happens globally and this is an expensive operation.
+The remeshing at each time step happens globally, and this is an expensive operation.
 Therefore, mesh optimization does not fit our workflow because expensive global updates should be avoided.
-Computer graphics uses similar adaptive methods where a surface can be represented by a smooth surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
-An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field, this is called anisotropic meshing[@alliez2003anisotropic].
+Computer graphics uses similar adaptive methods where a smooth surface can represent a surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
+An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field; this is called anisotropic meshing[@alliez2003anisotropic].
 
 # Design constraints and the general algorithm
 
@@ -104,19 +108,19 @@ An example of such a polygonal remeshing method is one where the polygons align 
 The general algorithm that we describe in this paper works best for low to intermediary cost functions.
 The point suggestion step happens in a single sequential process while the function executions can be in parallel.
 This means that to benefit from an adaptive sampling algorithm $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$ must hold, here $t_\textrm{function}$ is the average function execution time, $N_\textrm{workers}$ the number of parallel processes, and $t_\textrm{suggest}$ the time it takes to suggest a new point.
-Very fast functions can be calculated on a dense grid and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large, nonetheless, a large class of functions is inside the right regime for Adaptive to be beneficial.
+Very fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large; nonetheless, a large class of functions is inside the right regime for Adaptive to be beneficial.
 Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 To minimize $t_\textrm{suggest}$ and equivalently make the point suggestion algorithm as fast as possible, we propose to assign a loss to each interval.
 This loss is determined only by the function values of the points inside that interval and optionally of its neighboring intervals too.
-The local loss function values then serve as a criterion for choosing the next point by the virtue of choosing a new candidate point inside the interval with the maximum loss.
-This means that upon adding new data points only the intervals near the new point needs to have their loss value updated.
+The local loss function values then serve as a criterion for choosing the next point by virtue of choosing a new candidate point inside the interval with the maximum loss.
+This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
 
-#### As an example the interpoint distance is a good loss function in one dimension.
+#### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
 This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
-A more complex loss function that also takes the first neighboring intervals into account, is one that adds more points where the second derivative (or curvature) is the highest.
+A more complex loss function that also takes the first neighboring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:adaptive_vs_grid shows a comparison between this loss and a function that is sampled on a grid.
 
 #### In general local loss functions only have a logarithmic overhead.
@@ -142,7 +146,7 @@ Figure @fig:adaptive_vs_grid shows a comparison between this loss and a function
 ## Line simplification loss
 
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
-Inspired by a method commonly employed in digital cartography for coast line simplification, we construct a loss function that does its reverse. [@visvalingam1990douglas]
+Inspired by a method commonly employed in digital cartography for coastline simplification, we construct a loss function that does its reverse. [@visvalingam1990douglas]
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
 ## A parallelizable adaptive integration algorithm based on cquad
