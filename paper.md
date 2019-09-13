@@ -145,7 +145,29 @@ When querying $n>1$ points, the former procedure simply repeats $n$ times.
 #### A failure mode of such algorithms is sampling only a small neighborhood of one point.
 <!-- example of distance loss on singularities -->
 ```python
-import adaptive
+from adaptive import Learner1D, Runner
+from module import complicated_function
+
+learner = Learner1D(
+	complicated_function,
+	bounds=(-1, 1),
+)
+
+def goal(learner):
+	return learner.loss() < 0.01
+
+runner = Runner(learner, goal)
+```
+
+```python
+def default_loss(xs, ys):
+    dx = xs[1] - xs[0]
+    dy = ys[1] - ys[0]
+    return numpy.hypot(dx, dy)
+
+def uniform_loss(xs, ys):
+    dx = xs[1] - xs[0]
+    return dx
 
 ```
 
