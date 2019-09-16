@@ -36,10 +36,13 @@ If the goal of the simulation is to approximate a continuous function with the l
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
+![The algorithm.
+](figures/algo.pdf){#fig:algo}
+
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
 Due to parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
 Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
-A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values.
+A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
 For a one-dimensional function with three points known (its boundary points and a point in the center), the following steps repeat itself:
 (1) keep all points $x$ sorted, where two consecutive points define an interval,
 (2) calculate the Euclidean distance for each interval (see $L_{1,2}$ in Fig. @fig:loss_1D),
