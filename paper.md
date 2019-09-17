@@ -320,7 +320,7 @@ bal_learner = BalancingLearner(learners)
 runner = Runner(bal_learner, goal)
 
 ```
-For more details on how to use Adaptive we recommend to read the documentation [@adaptive_docs].
+For more details on how to use Adaptive, we recommend to read the tutorial inside the documentation [@adaptive_docs].
 
 # Possible extensions
 
