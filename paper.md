@@ -40,7 +40,7 @@ One of the most significant complications here is to parallelize this algorithm,
 We start by calculating the two boundary points.
 Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
 Each interval has a loss associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
-At each time step the interval with the largest loss is indicated, with its corresponding candidate point (green) in the middle of the interval.
+At each time step the interval with the largest loss is indicated (red), with its corresponding candidate point (green) in the middle of the interval.
 The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
