@@ -198,13 +198,15 @@ By adding the two loss functions, we can combine the 3D area loss to exploit int
 ## Line simplification loss
 
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
-Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse. [@visvalingam1990douglas]
+Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse.[@visvalingam1990douglas]
+Here, at each point (ignoring the boundary points), we compute the effective area associated with its triangle, see Fig. @fig:line_loss(b).
+The loss then becomes the average area of two adjacent traingles.
 
 ![Line loss visualization.
 We start with 6 points (a) on the function (grey).
 Ignoring the endpoints, the effective area of each point is determined by its associated triangle (b).
 The loss of each interval can be computed by taking the average area of the adjacent triangles.
-Subplots (c) and (d) show the the subsequent time steps.](figures/line_loss.pdf){#fig:line_loss}
+Subplots (c), (d), and (e) show the subsequent time steps following (b).](figures/line_loss.pdf){#fig:line_loss}
 
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
