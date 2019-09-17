@@ -234,10 +234,13 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 <!-- figure here -->
 
 # Implementation and benchmarks
+
+#### The learner abstracts a loss based priority queue.
 We will now introduce Adaptive's API.
 The object that can suggest points based on existing data is called a *learner*.
-When the function value is known, we can add it to the learner's data structure, such that it can suggest more interesting points later.
-We can define a learner as follows
+It abstracts a loss based priority queue.
+We can either *ask* for points or *tell* the `learner` new data point.
+We can define a *learner* as follows
 ```python
 from adaptive import Learner1D
 
@@ -248,6 +251,8 @@ def peak(x): # pretend this is a slow function
 learner = Learner1D(peak, bounds=(-1, 1))
 
 ```
+
+#### The runner orchestrates the function evaluation.
 To drive the learner manually (not recommended) and sequentially, we can do
 ```python
 def goal(learner):
@@ -260,30 +265,61 @@ while not goal(learner):
         y = f(x)
         learner.tell(x, y)
 ```
-To do this automatically (recommended) and in parallel (by default on all cores available)
+To do this automatically (recommended) and in parallel (by default on all cores available) use
 ```python
 from adaptive import Runner
 runner = Runner(learner, goal)
 ```
 This will return immediately because the calculation happens in the background.
-That also means that as the calculation is in progress `learner.data` is accessible and plotted with `learner.plot()`.
-Additionally, in a Jupyter notebook environment, one can call `runner.live_info()` to display useful information.
-To change the loss function ...
-
+That also means that as the calculation is in progress, `learner.data` is accessible and can be plotted with `learner.plot()`.
+Additionally, in a Jupyter notebook environment, we can call `runner.live_info()` to display useful information.
+To change the loss function for the `Learner1D` we pass a loss function, like
 ```python
-def default_loss(xs, ys):
+def distance_loss(xs, ys): # used by default
     dx = xs[1] - xs[0]
     dy = ys[1] - ys[0]
     return numpy.hypot(dx, dy)
 
+learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=distance_loss)
+```
+Creating a homogeneous loss function is as simple as
+```python
 def uniform_loss(xs, ys):
     dx = xs[1] - xs[0]
     return dx
 
+learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=uniform_loss)
 ```
-#### The learner abstracts a loss based priority queue.
 
-#### The runner orchestrates the function evaluation.
+We have also implemented a `LearnerND` with a similar API
+```python
+from adaptive import LearnerND
+
+def ring(xy): # pretend this is a slow function
+    x, y = xy
+    a = 0.2
+    return x + numpy.exp(-(x**2 + y**2 - 0.75**2)**2/a**4)
+
+learner = adaptive.LearnerND(ring, bounds=[(-1, 1), (-1, 1)])
+runner = Runner(learner, goal)
+```
+
+#### The BalancingLearner can run many learners simultaneously.
+Frequently, we need to run more than one function (learner) at once, for this we have implemented the `BalancingLearner`.
+This learner asks all child learners for points, and will choose the point of the learner that maximizes the loss improvement.
+We can use it like
+```python
+from functools import partial
+from adaptive import BalancingLearner
+
+def f(x, pow):
+    return x**pow
+
+learners = [Learner1D(partial(f, pow=i)), bounds=(-10, 10) for i in range(2, 10)]
+bal_learner = BalancingLearner(learners)
+runner = Runner(bal_learner, goal)
+
+```
 
 # Possible extensions
 
