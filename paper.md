@@ -50,7 +50,7 @@ Additionally, the algorithm should also be fast in order to handle many parallel
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
 For a one-dimensional function with three points known (its boundary points and a point in the center), the following steps repeat itself:
 (1) keep all points $x$ sorted, where two consecutive points define an interval,
-(2) calculate the distance for each interval $L_{1,2}=\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$,
+(2) calculate the distance for each interval $L_{i, i+1}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}}$,
 (3) pick a new point $x_\textrm{new}$ in the middle of the largest interval, creating two new intervals around that point,
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
@@ -154,11 +154,29 @@ The interval then splits into $N$ new intervals, as explained in the previous pa
 
 #### A failure mode of such algorithms is sampling only a small neighbourhood of one point.
 The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
-For example, $1/x^2$ has a singularity and will be sampled too densely around $x=0$ using this loss.
+For example, $1/x^2$ has a singularity at $x=0$ and will be sampled too densely around that singularity using this loss.
 We can avoid this by defining additional logic inside the loss function.
 
 #### A solution is to regularize the loss such that this would be avoided.
-<!-- like resolution loss which limits the size of an interval -->
+To avoid indefinitely sampling the function based on a distance loss alone, we can regularize the loss.
+A simple (but not optimal) strategy is to limit the size of each interval in the $x$ direction using,
+
+\begin{equation}
+L_{i, i+1}^\textrm{dist}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}},
+\end{equation}
+
+\begin{equation}
+L_{i,i+1}^\textrm{reg}=\begin{cases}
+\begin{array}{c}
+0\\
+L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
+\end{array} & \begin{array}{c}
+\textrm{if} \; x_{i+1}-x_{i}<\epsilon\\
+\textrm{else,}
+\end{array}\end{cases}
+\end{equation}
+
+where $\epsilon$ is the smallest resolution we want to sample.
 
 #### Adding loss functions allows for balancing between multiple priorities.
 <!-- i.e. area + line simplification -->
