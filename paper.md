@@ -136,7 +136,6 @@ A more complex loss function that also takes the first neighbouring intervals in
 Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
-<!-- Bas: the text below does not really describe what is written above, but is an essential part nonetheless -->
 So far, the description of the general algorithm did not include parallelism.
 The algorithm needs to be able to suggest multiple points at the same time and remember which points it suggests.
 When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
@@ -171,7 +170,7 @@ L_{i,i+1}^\textrm{reg}=\begin{cases}
 0\\
 L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
 \end{array} & \begin{array}{c}
-\textrm{if} \; x_{i+1}-x_{i}<\epsilon\\
+\textrm{if} \; x_{i+1}-x_{i}<\epsilon,\\
 \textrm{else,}
 \end{array}\end{cases}
 \end{equation*}
@@ -199,7 +198,14 @@ By adding the two loss functions, we can combine the 3D area loss to exploit int
 ## Line simplification loss
 
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
-Inspired by a method commonly employed in digital cartography for coastline simplification, we construct a loss function that does its reverse. [@visvalingam1990douglas]
+Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse. [@visvalingam1990douglas]
+
+![Line loss visualization.
+We start with 6 points (a) on the function (grey).
+Ignoring the endpoints, the effective area of each point is determined by its associated triangle (b).
+The loss of each interval can be computed by taking the average area of the adjacent triangles.
+Subplots (c) and (d) show the the subsequent time steps.](figures/line_loss.pdf){#fig:line_loss}
+
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
 ## A parallelizable adaptive integration algorithm based on cquad
