@@ -238,8 +238,8 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 #### The learner abstracts a loss based priority queue.
 We will now introduce Adaptive's API.
 The object that can suggest points based on existing data is called a *learner*.
-It abstracts a loss based priority queue.
-We can either *ask* for points or *tell* the `learner` new data point.
+The learner abstracts a loss based priority queue.
+We can either *ask* it for points or *tell* the `learner` new data point.
 We can define a *learner* as follows
 ```python
 from adaptive import Learner1D
