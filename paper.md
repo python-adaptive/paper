@@ -161,11 +161,11 @@ We can avoid this by defining additional logic inside the loss function.
 To avoid indefinitely sampling the function based on a distance loss alone, we can regularize the loss.
 A simple (but not optimal) strategy is to limit the size of each interval in the $x$ direction using,
 
-\begin{equation}
+\begin{equation*}
 L_{i, i+1}^\textrm{dist}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}},
-\end{equation}
+\end{equation*}
 
-\begin{equation}
+\begin{equation*}
 L_{i,i+1}^\textrm{reg}=\begin{cases}
 \begin{array}{c}
 0\\
@@ -174,15 +174,25 @@ L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
 \textrm{if} \; x_{i+1}-x_{i}<\epsilon\\
 \textrm{else,}
 \end{array}\end{cases}
-\end{equation}
+\end{equation*}
 
 where $\epsilon$ is the smallest resolution we want to sample.
 
 #### Adding loss functions allows for balancing between multiple priorities.
-<!-- i.e. area + line simplification -->
+Different loss functions prioritize sampling different features.
+Adding loss functions allows for balancing between the multiple desired priorities.
+For example, combining a loss function that calculates the curvature (or $d^2 y / dx^2$) with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
 
 #### A desirable property is that eventually, all points should be sampled.
-<!-- exploration vs. exploitation -->
+In two-dimensions (2D), intervals are defined by triangles, where its vertices are known data points.
+Losses are therefore calculated for each triangle.
+A distance loss equivalent in 2D, is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
+Using this loss function, some narrow features in otherwise flat regions, might not be discovered initially.
+It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
+A loss functions that ensure this is a homogeneous loss function that returns 2D area span by the $x, y$ coordinates.
+However, this loss function does not use the function-values and is therefore by itself is not an efficient solution.
+Ideally, interesting regions are sampled more densely, while simultaneously new potentially interesting regions are also discovered.
+By adding the two loss functions, we can combine the 3D area loss to exploit interesting regions, while the 2D area loss explores less densily sampled regions that might contain interesting features.
 
 # Examples
 
