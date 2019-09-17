@@ -130,7 +130,7 @@ This means that upon adding new data points, only the intervals near the new poi
 The amortized complexity of the point suggestion algorithm is, therefore, $\mathcal{O}(1)$.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
-An example of such a loss function for a one-dimensional function is the interpoint distance, such as in Fig. @fig:loss_1D.
+An example of such a loss function for a one-dimensional function is the interpoint distance.
 This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
 A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
