@@ -40,7 +40,7 @@ One of the most significant complications here is to parallelize this algorithm,
 We start by calculating the two boundary points.
 Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
 Each interval has a loss associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
-At each time step the interval with the largest loss is indicated (red), with its corresponding candidate point (green) picked in the middle of the interval.
+At each iteration the interval with the largest loss is indicated (red), with its corresponding candidate point (green) picked in the middle of the interval.
 The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
@@ -201,12 +201,14 @@ By adding the two loss functions, we can combine the 3D area loss to exploit int
 Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse.[@visvalingam1990douglas]
 Here, at each point (ignoring the boundary points), we compute the effective area associated with its triangle, see Fig. @fig:line_loss(b).
 The loss then becomes the average area of two adjacent traingles.
+By Taylor expanding $f$ around $x$ it can be shown that the area of the triangles relates to the contributions of the second derivative.
+We can generalize this loss to $N$ dimensions
 
 ![Line loss visualization.
 We start with 6 points (a) on the function (grey).
 Ignoring the endpoints, the effective area of each point is determined by its associated triangle (b).
 The loss of each interval can be computed by taking the average area of the adjacent triangles.
-Subplots (c), (d), and (e) show the subsequent time steps following (b).](figures/line_loss.pdf){#fig:line_loss}
+Subplots (c), (d), and (e) show the subsequent interations following (b).](figures/line_loss.pdf){#fig:line_loss}
 
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
