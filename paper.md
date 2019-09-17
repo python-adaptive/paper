@@ -305,8 +305,8 @@ runner = Runner(learner, goal)
 ```
 
 #### The BalancingLearner can run many learners simultaneously.
-Frequently, we need to run more than one function (learner) at once, for this we have implemented the `BalancingLearner`.
-This learner asks all child learners for points, and will choose the point of the learner that maximizes the loss improvement.
+Frequently, we need to run more than one function (learner) at once, for this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
+This learner asks all child learners for points and will choose the point of the learner that maximizes the loss improvement, thereby it balances the resources over the different learners.
 We can use it like
 ```python
 from functools import partial
@@ -320,6 +320,7 @@ bal_learner = BalancingLearner(learners)
 runner = Runner(bal_learner, goal)
 
 ```
+For more details on how to use Adaptive we recommend to read the documentation [@adaptive_docs].
 
 # Possible extensions
 
