@@ -36,7 +36,12 @@ If the goal of the simulation is to approximate a continuous function with the l
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
-![The algorithm.
+![Visualization of a simple point choosing algorithm for a black box function (grey).
+We start by calculating the two boundary points.
+Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
+Each interval has a loss associated with it that can be calculated from the points in the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
+At each time step the interval with the largest loss is indicated, with its corresponding candidate point (green) in the middle of the interval.
+The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
@@ -53,12 +58,6 @@ In this paper, we describe a class of algorithms that rely on local criteria for
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
 In the case of the integration algorithm, the loss is the error estimate.
 The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
-
-![Visualization of a simple point choosing algorithm for a black box function (grey).
-The existing data points (green) $\{x_i, y_i\}_{i \in 1...4}$ and corresponding candidate points (red) in the middle of each interval.
-Each candidate point has a loss $L$ indicated by the size of the red dots.
-The candidate point with the largest loss will be chosen, which in this case is the one with $L_{1,2}$.
-](figures/loss_1D.pdf){#fig:loss_1D}
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
 We see that when the function has a distinct feature---such as with the peak and tanh---adaptive sampling performs much better.
