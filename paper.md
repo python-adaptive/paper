@@ -224,8 +224,7 @@ In all cases adaptive sampling performs better, where the error is a factor 1.6-
 ](figures/line_loss_error.pdf){#fig:line_loss_error}
 
 Figure @fig:line_loss_error shows this error as function of the number of points $N$.
-
-<!-- https://bost.ocks.org/mike/simplify/ -->
+Here, we see that for homogeneous sampling to get the same error as sampling with a line loss, a factor $\approx 10$ times more points are needed.
 
 ## A parallelizable adaptive integration algorithm based on cquad
 
