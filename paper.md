@@ -32,7 +32,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 <!-- This should convey the point that it is advantageous to do this. -->
 A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e., hydrodynamics-->
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive].
+If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
@@ -40,7 +40,7 @@ One of the most significant complications here is to parallelize this algorithm,
 We start by calculating the two boundary points.
 Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
 Each interval has a loss associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
-At each time step the interval with the largest loss is indicated (red), with its corresponding candidate point (green) in the middle of the interval.
+At each time step the interval with the largest loss is indicated (red), with its corresponding candidate point (green) picked in the middle of the interval.
 The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
@@ -50,11 +50,11 @@ Additionally, the algorithm should also be fast in order to handle many parallel
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
 For a one-dimensional function with three points known (its boundary points and a point in the center), the following steps repeat itself:
 (1) keep all points $x$ sorted, where two consecutive points define an interval,
-(2) calculate the Euclidean distance for each interval (see $L_{1,2}$ in Fig. @fig:loss_1D),
+(2) calculate the distance for each interval $L_{1,2}=\sqrt{(x_2 - x_1)^2 + (y_2 - y_1)^2}$,
 (3) pick a new point $x_\textrm{new}$ in the middle of the largest interval, creating two new intervals around that point,
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
-In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the previously mentioned example.
+In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the former example.
 Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
 In the case of the integration algorithm, the loss is the error estimate.
 The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
@@ -135,17 +135,20 @@ This loss will suggest to sample a point in the middle of an interval with the l
 A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
 
-#### In general local loss functions only have a logarithmic overhead.
-<!-- Bas: not sure what to write here -->
-
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 <!-- Bas: the text below does not really describe what is written above, but is an essential part nonetheless -->
 So far, the description of the general algorithm did not include parallelism.
-It needs to be able to suggest multiple points at the same time and remember which points it suggests.
+The algorithm needs to be able to suggest multiple points at the same time and remember which points it suggests.
 When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
 A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created intervals until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neigbors})$ of these new intervals, where $L \ge L_\textrm{temp}$.
 For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assign the interpolated value to $y_\textrm{new}$ until it is known.
 When querying $n>1$ points, the above procedure simply repeats $n$ times.
+
+#### In general local loss functions only have a logarithmic overhead.
+Due to the local nature of the loss function, the asymptotic complexity is logarithmic.
+This is because the losses per interval are stored in a sorted list.
+When asking for a new candidate point, the top entry is picked $\mathcal{O}(1)$.
+The interval then splits into $N$ new intervals, as explained in the previous paragraph, its losses have to be inserted into the sorted list again with $\mathcal{O}(\log{n})$.
 
 # Loss function design
 
