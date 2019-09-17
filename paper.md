@@ -141,13 +141,13 @@ So far, the description of the general algorithm did not include parallelism.
 The algorithm needs to be able to suggest multiple points at the same time and remember which points it suggests.
 When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
 A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created intervals until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neigbors})$ of these new intervals, where $L \ge L_\textrm{temp}$.
-For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assign the interpolated value to $y_\textrm{new}$ until it is known.
-When querying $n>1$ points, the above procedure simply repeats $n$ times.
+For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assigning the interpolated value to $y_\textrm{new}$ until it is known.
+When querying $n>1$ points, the above procedure repeats $n$ times.
 
 #### In general local loss functions only have a logarithmic overhead.
 Due to the local nature of the loss function, the asymptotic complexity is logarithmic.
-This is because the losses per interval are stored in a sorted list.
-When asking for a new candidate point, the top entry is picked $\mathcal{O}(1)$.
+This is because Adaptive stores the losses per interval in a sorted list.
+When asking for a new candidate point, the top entry is picked with $\mathcal{O}(1)$.
 The interval then splits into $N$ new intervals, as explained in the previous paragraph, its losses have to be inserted into the sorted list again with $\mathcal{O}(\log{n})$.
 
 # Loss function design
