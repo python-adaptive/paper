@@ -36,10 +36,10 @@ If the goal of the simulation is to approximate a continuous function with the l
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
-![Visualization of a simple point choosing algorithm for a black box function (grey).
+![Visualization of a 1-D point choosing algorithm for a black box function (grey).
 We start by calculating the two boundary points.
 Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
-Each interval has a loss associated with it that can be calculated from the points in the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
+Each interval has a loss associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$.
 At each time step the interval with the largest loss is indicated, with its corresponding candidate point (green) in the middle of the interval.
 The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
