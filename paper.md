@@ -202,13 +202,28 @@ Inspired by a method commonly employed in digital cartography for coastline simp
 Here, at each point (ignoring the boundary points), we compute the effective area associated with its triangle, see Fig. @fig:line_loss(b).
 The loss then becomes the average area of two adjacent traingles.
 By Taylor expanding $f$ around $x$ it can be shown that the area of the triangles relates to the contributions of the second derivative.
-We can generalize this loss to $N$ dimensions
+We can generalize this loss to $N$ dimensions, where the triangle is replaced by a $(N+1)$ dimensional simplex.
 
 ![Line loss visualization.
-We start with 6 points (a) on the function (grey).
+In this example, we start with 6 points (a) on the function (grey).
 Ignoring the endpoints, the effective area of each point is determined by its associated triangle (b).
 The loss of each interval can be computed by taking the average area of the adjacent triangles.
 Subplots (c), (d), and (e) show the subsequent interations following (b).](figures/line_loss.pdf){#fig:line_loss}
+
+In order to compare sampling strategies, we need to define some error.
+We construct a linear interpolation function $\tilde{f}$, which is an approximation of $f$.
+We calculate the error in the $L^{1}$-norm, defined as,
+$$
+\text{Err}_{1}(\tilde{f})=\left\Vert \tilde{f}-f\right\Vert _{L^{1}}=\int_{a}^{b}\left|\tilde{f}(x)-f(x)\right|\text{d}x.
+$$
+This error approaches zero as the approximation becomes better.
+
+![The $L^{1}$-norm error as a function of number of points $N$ for the functions in Fig. @fig:adaptive_vs_grid (a,b,c).
+The interupted lines correspond to homogeneous sampling and the solid line to the sampling with the line loss.
+In all cases adaptive sampling performs better, where the error is a factor 1.6-20 lower for $N=10000$.
+](figures/line_loss_error.pdf){#fig:line_loss_error}
+
+Figure @fig:line_loss_error shows this error as function of the number of points $N$.
 
 <!-- https://bost.ocks.org/mike/simplify/ -->
 
