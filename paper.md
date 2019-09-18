@@ -325,7 +325,11 @@ For more details on how to use Adaptive, we recommend reading the tutorial insid
 # Possible extensions
 
 #### Anisotropic triangulation would improve the algorithm.
-[@dyn1990data]
+The current implementation of choosing the candidate point inside a simplex (triangle for 2D) with the highest loss, for the `LearnerND`, works by either picking a point (1) in the center of the simplex or (2) by picking a point on the longest edge of the simplex.
+The choice depends on the shape of the simplex, where the algorithm tries to create regular simplices.
+Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation[@dyn1990data].
+This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
+We have started to implement this, however, there are still some unsolved problems.
 
 #### Learning stochastic functions is a promising direction.
 
