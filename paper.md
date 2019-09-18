@@ -184,14 +184,14 @@ For example, combining a loss function that calculates the curvature (or $d^2 y 
 
 #### A desirable property is that eventually, all points should be sampled.
 In two-dimensions (2D), intervals are defined by triangles, where its vertices are known data points.
-Losses are therefore calculated for each triangle.
+Losses are therefore calculated for each triangle, but unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result of it.
 A distance loss equivalent in 2D, is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
 Using this loss function, some narrow features in otherwise flat regions, might not be discovered initially.
 It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
-A loss functions that ensure this is a homogeneous loss function that returns 2D area span by the $x, y$ coordinates.
+A loss functions that ensure this is a homogeneous loss function that returns the 2D area span by the $x, y$ coordinates.
 However, this loss function does not use the function-values and is therefore by itself is not an efficient solution.
 Ideally, interesting regions are sampled more densely, while simultaneously new potentially interesting regions are also discovered.
-By adding the two loss functions, we can combine the 3D area loss to exploit interesting regions, while the 2D area loss explores less densily sampled regions that might contain interesting features.
+By adding the two loss functions, we can combine the 3D area loss to exploit interesting regions, while the 2D area loss explores less densely sampled regions that might contain interesting features.
 
 # Examples
 
@@ -200,7 +200,7 @@ By adding the two loss functions, we can combine the 3D area loss to exploit int
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
 Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse.[@visvalingam1990douglas]
 Here, at each point (ignoring the boundary points), we compute the effective area associated with its triangle, see Fig. @fig:line_loss(b).
-The loss then becomes the average area of two adjacent traingles.
+The loss then becomes the average area of two adjacent triangles.
 By Taylor expanding $f$ around $x$ it can be shown that the area of the triangles relates to the contributions of the second derivative.
 We can generalize this loss to $N$ dimensions, where the triangle is replaced by a $(N+1)$ dimensional simplex.
 
@@ -219,11 +219,11 @@ $$
 This error approaches zero as the approximation becomes better.
 
 ![The $L^{1}$-norm error as a function of number of points $N$ for the functions in Fig. @fig:adaptive_vs_grid (a,b,c).
-The interupted lines correspond to homogeneous sampling and the solid line to the sampling with the line loss.
+The interrupted lines correspond to homogeneous sampling and the solid line to the sampling with the line loss.
 In all cases adaptive sampling performs better, where the error is a factor 1.6-20 lower for $N=10000$.
 ](figures/line_loss_error.pdf){#fig:line_loss_error}
 
-Figure @fig:line_loss_error shows this error as function of the number of points $N$.
+Figure @fig:line_loss_error shows this error as a function of the number of points $N$.
 Here, we see that for homogeneous sampling to get the same error as sampling with a line loss, a factor $\approx 1.6-20$ times more points are needed, depending on the function.
 
 ## A parallelizable adaptive integration algorithm based on cquad
@@ -239,7 +239,7 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 We will now introduce Adaptive's API.
 The object that can suggest points based on existing data is called a *learner*.
 The learner abstracts a loss based priority queue.
-We can either *ask* it for points or *tell* the *learner* new data point.
+We can either *ask* it for points or *tell* the *learner* new data points.
 We can define a *learner* as follows
 ```python
 from adaptive import Learner1D
@@ -305,8 +305,8 @@ runner = Runner(learner, goal)
 ```
 
 #### The BalancingLearner can run many learners simultaneously.
-Frequently, we need to run more than one function (learner) at once, for this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
-This learner asks all child learners for points and will choose the point of the learner that maximizes the loss improvement, thereby it balances the resources over the different learners.
+Frequently, we need to run more than one function (learner) at once, for this, we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
+This learner internally asks all child learners for points and will choose the point of the learner that maximizes the loss improvement; thereby, it balances the resources over the different learners.
 We can use it like
 ```python
 from functools import partial
@@ -320,11 +320,12 @@ bal_learner = BalancingLearner(learners)
 runner = Runner(bal_learner, goal)
 
 ```
-For more details on how to use Adaptive, we recommend to read the tutorial inside the documentation [@adaptive_docs].
+For more details on how to use Adaptive, we recommend reading the tutorial inside the documentation [@adaptive_docs].
 
 # Possible extensions
 
 #### Anisotropic triangulation would improve the algorithm.
+[@dyn1990data]
 
 #### Learning stochastic functions is a promising direction.
 
