@@ -336,10 +336,16 @@ Stochastic functions frequently appear in numerical sciences.
 Currently, Adaptive has a `AverageLearner` that samples a stochastic function with no degrees of freedom until a certain standard error of the mean is reached.
 This is advantageous because no predetermined number of samples has to be set before starting the simulation.
 Extending this learner to be able to deal with more dimensions would be a useful addition.
-There is an effort to implement an `AverageLearner1D` and `AverageLearner2D`, however, it requires more work to make it reliable.
+There is an ongoing effort to implement an `AverageLearner1D` and `AverageLearner2D`, however, it requires more work to make it reliable.
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
-
+Finally, there is the potential to use Adaptive for experimental control.
+Experiments often deal with noise, which could be solved by taking multiple measurements and averaging over the outcomes, such as the (not yet existing) `AverageLearnerND` will do.
+Another challenge in experiments is that changing parameters can be slow.
+Sweeping over one dimension might be faster than in others; for example, in condensed matter physics experiments, sweeping the magnetic field is much slower than sweeping frequencies.
+Additionally, some experiments exhibit hysteresis, which would mean that the sampling direction has to be restricted to certain paths.
+All these factors have to be taken into account to create a general-purpose sampler that can be used for experiments.
+However, Adaptive can already be used in experiments that are not restricted by the former effects.
 
 <!-- We can include things like:
 * Asymptotically complexity of algorithms
