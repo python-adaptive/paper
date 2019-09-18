@@ -305,7 +305,7 @@ runner = Runner(learner, goal)
 ```
 
 #### The BalancingLearner can run many learners simultaneously.
-Frequently, we need to run more than one function (learner) at once, for this, we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
+Frequently, more than one function (learner) needs to run at once, to do this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
 This learner internally asks all child learners for points and will choose the point of the learner that maximizes the loss improvement; thereby, it balances the resources over the different learners.
 We can use it like
 ```python
@@ -343,7 +343,7 @@ Finally, there is the potential to use Adaptive for experimental control.
 Experiments often deal with noise, which could be solved by taking multiple measurements and averaging over the outcomes, such as the (not yet existing) `AverageLearnerND` will do.
 Another challenge in experiments is that changing parameters can be slow.
 Sweeping over one dimension might be faster than in others; for example, in condensed matter physics experiments, sweeping the magnetic field is much slower than sweeping frequencies.
-Additionally, some experiments exhibit hysteresis, which would mean that the sampling direction has to be restricted to certain paths.
+Additionally, some experiments exhibit hysteresis, which means that the sampling direction has to be restricted to certain paths.
 All these factors have to be taken into account to create a general-purpose sampler that can be used for experiments.
 However, Adaptive can already be used in experiments that are not restricted by the former effects.
 
