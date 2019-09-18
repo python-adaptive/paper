@@ -32,7 +32,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 <!-- This should convey the point that it is advantageous to do this. -->
 A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e., hydrodynamics-->
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest Euclidean distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
+If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
