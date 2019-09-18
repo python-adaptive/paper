@@ -325,13 +325,18 @@ For more details on how to use Adaptive, we recommend reading the tutorial insid
 # Possible extensions
 
 #### Anisotropic triangulation would improve the algorithm.
-The current implementation of choosing the candidate point inside a simplex (triangle for 2D) with the highest loss, for the `LearnerND`, works by either picking a point (1) in the center of the simplex or (2) by picking a point on the longest edge of the simplex.
+The current implementation of choosing the candidate point inside a simplex (triangle in 2D) with the highest loss, for the `LearnerND`, works by either picking a point (1) in the center of the simplex or (2) by picking a point on the longest edge of the simplex.
 The choice depends on the shape of the simplex, where the algorithm tries to create regular simplices.
 Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation[@dyn1990data].
 This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
-We have started to implement this feature in Adaptive, however, there are still some unsolved problems.
+We have started to implement this feature in Adaptive, however, there some unsolved problems remain.
 
 #### Learning stochastic functions is a promising direction.
+Stochastic functions frequently appear in numerical sciences.
+Currently, Adaptive has a `AverageLearner` that samples a stochastic function with no degrees of freedom until a certain standard error of the mean is reached.
+This is advantageous because no predetermined number of samples has to be set before starting the simulation.
+Extending this learner to be able to deal with more dimensions would be a useful addition.
+There is an effort to implement an `AverageLearner1D` and `AverageLearner2D`, however, it requires more work to make it reliable.
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
 
