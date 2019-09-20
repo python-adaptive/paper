@@ -230,8 +230,14 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 
 #### The `cquad` algorithm belongs to a class that is parallelizable.
 
-## isosurface sampling
-<!-- figure here -->
+## isoline and isosurface sampling
+We can find isolines or isosurfaces using a loss function that prioritizes intervals that are closer to the function values that we are interested in.
+See @fig:isoline.
+
+![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right).
+We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
+The solid line (black) indicates the isoline at $f(x,y)=0.1$.
+](figures/isoline.pdf){#fig:isoline}
 
 # Implementation and benchmarks
 
