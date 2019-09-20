@@ -61,14 +61,14 @@ The most significant advantage of these *local* algorithms is that they allow fo
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
 We see that when the function has a distinct feature---such as with the peak and tanh---adaptive sampling performs much better.
-When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/adaptive_vs_grid.pdf){#fig:adaptive_vs_grid}
+When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/Learner1D.pdf){#fig:Learner1D}
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
 On the left is a circle with a linear background $x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
 In the middle a topological phase diagram from [\onlinecite{nijholt2016orbital}] its function can be -1 or 1, which indicate the presence or abscence of a Majorana bound state.
 On the right we plot level crossings for a two level quantum system.
 In all cases using Adaptive results in a better plot.
-](figures/adaptive_2D.pdf){#fig:adaptive_2D}
+](figures/Learner2D.pdf){#fig:Learner2D}
 
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
@@ -133,7 +133,7 @@ The amortized complexity of the point suggestion algorithm is, therefore, $\math
 An example of such a loss function for a one-dimensional function is the interpoint distance.
 This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
 A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
-Figure @fig:adaptive_vs_grid shows a comparison between a result using this loss and a function that is sampled on a grid.
+Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
@@ -218,7 +218,7 @@ $$
 $$
 This error approaches zero as the approximation becomes better.
 
-![The $L^{1}$-norm error as a function of number of points $N$ for the functions in Fig. @fig:adaptive_vs_grid (a,b,c).
+![The $L^{1}$-norm error as a function of number of points $N$ for the functions in Fig. @fig:Learner1D (a,b,c).
 The interrupted lines correspond to homogeneous sampling and the solid line to the sampling with the line loss.
 In all cases adaptive sampling performs better, where the error is a factor 1.6-20 lower for $N=10000$.
 ](figures/line_loss_error.pdf){#fig:line_loss_error}
@@ -232,11 +232,12 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 
 ## isoline and isosurface sampling
 We can find isolines or isosurfaces using a loss function that prioritizes intervals that are closer to the function values that we are interested in.
-See @fig:isoline.
+See Fig. @fig:isoline.
 
-![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right).
+![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same amount of points $n=17^2=289$.
 We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
 The solid line (black) indicates the isoline at $f(x,y)=0.1$.
+The isoline in the homogeneous case consists of 62 line segments and the adaptive case consists of 147 line segments.
 ](figures/isoline.pdf){#fig:isoline}
 
 # Implementation and benchmarks
