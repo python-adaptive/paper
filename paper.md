@@ -78,6 +78,8 @@ Most of our algorithms allow for a customizable loss function with which one can
 It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
 It provides auxiliary functionality such as live-plotting, inspecting the data as the calculation is in progress, and automatically saving and loading of the data.
 
+The raw data and source code that produces all plots in this paper is available at [@papercode].
+
 # Review of adaptive sampling
 
 Optimal sampling and planning based on data is a mature field with different communities providing their own context, restrictions, and algorithms to solve their problems.
