@@ -4,16 +4,14 @@ import inspect
 import operator
 import sys
 from collections import OrderedDict
-from copy import copy, deepcopy
+from copy import deepcopy
 from functools import wraps
-from itertools import product
 from types import SimpleNamespace
 
 import kwant
 import numpy as np
 import scipy.constants
 from kwant.continuum.discretizer import discretize
-from skimage import measure
 
 import adaptive
 import pfaffian as pf
