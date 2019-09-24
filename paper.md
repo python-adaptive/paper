@@ -32,7 +32,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 <!-- This should convey the point that it is advantageous to do this. -->
 A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e., hydrodynamics-->
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a continuous function with the least amount of points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
+If the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
 Such a sampling strategy would trivially speedup many simulations.
 One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
 
@@ -45,13 +45,13 @@ The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
-Due to parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
+To facilitate parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
 Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
-For a one-dimensional function with three points known (its boundary points and a point in the center), the following steps repeat itself:
+For a one-dimensional function with three points known (its boundary points and a point in the center), such a simple algorithm would consist of the following steps:
 (1) keep all points $x$ sorted, where two consecutive points define an interval,
 (2) calculate the distance for each interval $L_{i, i+1}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}}$,
-(3) pick a new point $x_\textrm{new}$ in the middle of the largest interval, creating two new intervals around that point,
+(3) pick a new point $x_\textrm{new}$ in the middle of the interval with the largest $L$, creating two new intervals around that point,
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the former example.
@@ -64,17 +64,17 @@ We see that when the function has a distinct feature---such as with the peak and
 When the features are homogeneously spaced, such as with the wave packet, adaptive sampling is not as effective as in the other cases.](figures/Learner1D.pdf){#fig:Learner1D}
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
-On the left is a circle with a linear background $x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
-In the middle a topological phase diagram from [\onlinecite{nijholt2016orbital}] its function can be -1 or 1, which indicate the presence or abscence of a Majorana bound state.
+On the left is the function $f(x) = x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
+In the middle a topological phase diagram from [\onlinecite{nijholt2016orbital}], where the  function can take the values -1 or 1.
 On the right we plot level crossings for a two level quantum system.
-In all cases using Adaptive results in a better plot.
+In all cases using Adaptive results in a higher fidelity plot.
 ](figures/Learner2D.pdf){#fig:Learner2D}
 
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019a], which has previously been used in several scientific publications[@vuik2018reproducing; @laeven2019enhanced; @bommer2019spin; @melo2019supercurrent].
 It has algorithms for $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
-Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for a specific function.
+Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for different classes of functions.
 It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
 It provides auxiliary functionality such as live-plotting, inspecting the data as the calculation is in progress, and automatically saving and loading of the data.
 
@@ -85,29 +85,29 @@ To explain the relation of our approach with prior work, we discuss several exis
 This is not a systematic review of all these fields, but rather, we aim to identify the important traits and design considerations.
 
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
-Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters, and thereby, it reduces the costs of experimentation.[@emery1998optimal]
-It works with many degrees of freedom and can consider constraints, for example, when the sample space contains settings that are practically infeasible.
+Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters and, thereby, reduce the cost of experimentation.[@emery1998optimal]
+It works with many degrees of freedom and can consider constraints, for example when the sample space contains regions that are infeasible for practical reasons.
 One form of OED is response-adaptive design[@hu2006theory], which concerns the adaptive sampling of designs for statistical experiments.
-Here, the acquired data (i.e., the observations) are used to estimate the uncertainties of a certain desired parameter.
-Then it suggests further experiments that will optimally reduce these uncertainties.
+Here, the acquired data (i.e. the observations) are used to estimate the uncertainties of a certain desired parameter.
+It then suggests further experiments that will optimally reduce these uncertainties.
 In this step of the calculation Bayesian statistics is frequently used.
-Since Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions Markov chain Monte Carlo (MCMC) sampling is the goto tool in determining the most promising samples.
-In a typical non-adaptive experiment, decisions on experiments are done, are made and fixed in advance.
+Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples.
+In a typical non-adaptive experiment decisions on which experiments to perform, are made in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of function evaluations, one can use adaptive sampling routines.
-For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object which sampled the function in regions with high curvature more densely; however, details on the algorithm are not published.
+For example, for one-dimensional functions, Mathematica[@Mathematica] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object that samples the function more densely in regions with high curvature; however, details on the algorithm are not published.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value, or we can use it to plot the function without specifying a grid.
-Another application for adaptive sampling is integration.
+Another application for adaptive sampling is numerical integration.
 It works by estimating the integration error of each interval and then minimizing the sum of these errors greedily.
 For example, the `CQUAD` algorithm[@gonnet2010increasing] in the GNU Scientific Library[@galassi1996gnu] implements a more sophisticated strategy and is a doubly-adaptive general-purpose integration routine which can handle most types of singularities.
 In general, it requires more function evaluations than the integration routines in `QUADPACK`[@galassi1996gnu]; however, it works more often for difficult integrands.
 It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by adding more points---that do not lie on a regular grid---to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
-Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use an adaptive refinement of the triangulation mesh at which a partial differential equation is discretized.
-By providing smaller mesh elements in regions with a higher variation of the function, they reduce the amount of data and calculation needed at each step of time propagation.
+Hydrodynamics[@berger1989local; @berger1984adaptive] and astrophysics[@klein1999star] use an adaptive refinement of the triangulation mesh on which a partial differential equation is discretized.
+By providing smaller mesh elements in regions with a higher variation of the solution, they reduce the amount of data and calculation needed at each step of time propagation.
 The remeshing at each time step happens globally, and this is an expensive operation.
 Therefore, mesh optimization does not fit our workflow because expensive global updates should be avoided.
 Computer graphics uses similar adaptive methods where a smooth surface can represent a surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@derose1998subdivision].
@@ -116,7 +116,7 @@ An example of such a polygonal remeshing method is one where the polygons align 
 # Design constraints and the general algorithm
 
 #### We aim to sample low dimensional low to intermediate cost functions in parallel.
-The general algorithm that we describe in this paper works best for low to intermediary cost functions.
+The general algorithm that we describe in this paper works best for low to intermediate cost functions.
 The point suggestion step happens in a single sequential process while the function executions can be in parallel.
 This means that to benefit from an adaptive sampling algorithm $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$ must hold, here $t_\textrm{function}$ is the average function execution time, $N_\textrm{workers}$ the number of parallel processes, and $t_\textrm{suggest}$ the time it takes to suggest a new point.
 Very fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large; nonetheless, a large class of functions is inside the right regime for Adaptive to be beneficial.
@@ -145,9 +145,9 @@ When querying $n>1$ points, the above procedure repeats $n$ times.
 
 #### In general local loss functions only have a logarithmic overhead.
 Due to the local nature of the loss function, the asymptotic complexity is logarithmic.
-This is because Adaptive stores the losses per interval in a sorted list.
+This is because Adaptive stores the losses per interval in a max-heap
 When asking for a new candidate point, the top entry is picked with $\mathcal{O}(1)$.
-The interval then splits into $N$ new intervals, as explained in the previous paragraph, its losses have to be inserted into the sorted list again with $\mathcal{O}(\log{n})$.
+The interval then splits into $N$ new intervals, as explained in the previous paragraph, its losses have to be inserted into the heap again with $\mathcal{O}(\log{n})$.
 
 # Loss function design
 
@@ -180,13 +180,13 @@ where $\epsilon$ is the smallest resolution we want to sample.
 #### Adding loss functions allows for balancing between multiple priorities.
 Different loss functions prioritize sampling different features.
 Adding loss functions allows for balancing between the multiple desired priorities.
-For example, combining a loss function that calculates the curvature (or $d^2 y / dx^2$) with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
+For example, combining a loss function that calculates the curvature with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
 
 #### A desirable property is that eventually, all points should be sampled.
 In two-dimensions (2D), intervals are defined by triangles, where its vertices are known data points.
-Losses are therefore calculated for each triangle, but unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result of it.
+Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result.
 A distance loss equivalent in 2D, is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
-Using this loss function, some narrow features in otherwise flat regions, might not be discovered initially.
+Using this loss function some narrow features in otherwise flat regions might not be discovered initially.
 It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
 A loss functions that ensure this is a homogeneous loss function that returns the 2D area span by the $x, y$ coordinates.
 However, this loss function does not use the function-values and is therefore by itself is not an efficient solution.
@@ -336,14 +336,12 @@ The current implementation of choosing the candidate point inside a simplex (tri
 The choice depends on the shape of the simplex, where the algorithm tries to create regular simplices.
 Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation[@dyn1990data].
 This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
-We have started to implement this feature in Adaptive, however, some unsolved problems remain.
 
 #### Learning stochastic functions is a promising direction.
 Stochastic functions frequently appear in numerical sciences.
 Currently, Adaptive has a `AverageLearner` that samples a stochastic function with no degrees of freedom until a certain standard error of the mean is reached.
 This is advantageous because no predetermined number of samples has to be set before starting the simulation.
 Extending this learner to be able to deal with more dimensions would be a useful addition.
-There is an ongoing effort to implement an `AverageLearner1D` and `AverageLearner2D`, however, it requires more work to make it reliable.
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
 Finally, there is the potential to use Adaptive for experimental control.
