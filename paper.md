@@ -80,7 +80,7 @@ It provides auxiliary functionality such as live-plotting, inspecting the data a
 
 The raw data and source code that produces all plots in this paper is available at [@papercode].
 
-# Review of adaptive sampling
+# Review of adaptive sampling{#sec:review}
 
 Optimal sampling and planning based on data is a mature field with different communities providing their own context, restrictions, and algorithms to solve their problems.
 To explain the relation of our approach with prior work, we discuss several existing contexts.
@@ -231,6 +231,13 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 ## A parallelizable adaptive integration algorithm based on cquad
 
 #### The `cquad` algorithm belongs to a class that is parallelizable.
+In Sec. @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD`.[@gonnet2010increasing]
+This algorithm uses a Clenshaw-Curtis quadrature rules [@clenshaw1960method] of increasing degree $d$ in each interval.
+The error estimate is $\sqrt{\int{\left(f_0(x) - f_1(x)\right)^2}}$, where $f_0$ and $f_1$ are two successive interpolations of the integrand.
+To reach the desired total error, intervals with the maximum absolute error are improved.
+Either (1) the degree of the rule is increased or (2) the interval is split if either the function does not appear to be smooth or a rule of maximum degree ($d=4$) has been reached.
+All points inside the intervals can be trivially calculated in parallel; however, when there are more resources available than points, Adaptive needs to guess whether an (1) interval's should degree of the rule should be increased or (2) or the interval is split.
+Here, we choose to always increase until $d=4$, after which the interval is split.
 
 ## isoline and isosurface sampling
 We can find isolines or isosurfaces using a loss function that prioritizes intervals that are closer to the function values that we are interested in.
