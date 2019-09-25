@@ -323,19 +323,18 @@ runner = Runner(learner, goal)
 Again, like the `Learner1D`, it is possible to specify a custom loss function.
 For example, the loss function used to find the iso-line in Fig. @fig:isoline (b) is
 ```python
+from adaptive.learner.learnerND import default_loss
+
+def gaussian(x, mu, sigma):
+    return np.exp(-(x - mu) ** 2 / sigma ** 2 / 2)
+
 def isoline_loss_function(level, sigma, priority):
-    from adaptive.learner.learnerND import default_loss
-
-    def gaussian(x, mu, sigma):
-        return np.exp(-(x - mu) ** 2 / sigma ** 2 / 2)
-
     def loss(simplex, values, value_scale):
         values = np.array(values)
         dist = abs(level * value_scale - values).mean()
         L_default = default_loss(simplex, values, value_scale)
         L_dist = priority * gaussian(dist, 0, sigma)
         return L_dist + L_default
-
     return loss
 
 loss_per_simplex = isoline_loss_function(0.1, 0.4, 0.5)
