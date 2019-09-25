@@ -294,7 +294,7 @@ To change the loss function for the `Learner1D` we pass a loss function, like
 def distance_loss(xs, ys): # used by default
     dx = xs[1] - xs[0]
     dy = ys[1] - ys[0]
-    return numpy.hypot(dx, dy)
+    return np.hypot(dx, dy)
 
 learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=distance_loss)
 ```
@@ -314,7 +314,7 @@ from adaptive import LearnerND
 def ring(xy): # pretend this is a slow function
     x, y = xy
     a = 0.2
-    return x + numpy.exp(-(x**2 + y**2 - 0.75**2)**2/a**4)
+    return x + np.exp(-(x**2 + y**2 - 0.75**2)**2/a**4)
 
 learner = adaptive.LearnerND(ring, bounds=[(-1, 1), (-1, 1)])
 runner = Runner(learner, goal)
@@ -326,7 +326,7 @@ For example, the loss function used to find the iso-line in Fig. @fig:isoline (b
 from adaptive.learner.learnerND import default_loss
 
 def gaussian(x, mu, sigma):
-    return np.exp(-(x - mu) ** 2 / sigma ** 2 / 2)
+    return np.exp(-(x - mu)**2 / sigma**2 / 2)
 
 def isoline_loss_function(level, sigma, priority):
     def loss(simplex, values, value_scale):
