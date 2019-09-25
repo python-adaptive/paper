@@ -320,25 +320,7 @@ learner = adaptive.LearnerND(ring, bounds=[(-1, 1), (-1, 1)])
 runner = Runner(learner, goal)
 ```
 
-Again, like the `Learner1D`, it is possible to specify a custom loss function.
-For example, the loss function used to find the iso-line in Fig. @fig:isoline (b) is
-```python
-from adaptive.learner.learnerND import default_loss
-
-def gaussian(x, mu, sigma):
-    return np.exp(-(x - mu)**2 / sigma**2 / 2)
-
-def isoline_loss_function(level, sigma, priority):
-    def loss(simplex, values, value_scale):
-        values = np.array(values)
-        dist = abs(level * value_scale - values).mean()
-        L_default = default_loss(simplex, values, value_scale)
-        L_dist = priority * gaussian(dist, 0, sigma)
-        return L_dist + L_default
-    return loss
-
-loss_per_simplex = isoline_loss_function(0.1, 0.4, 0.5)
-```
+Again, it is possible to specify a custom loss function using the `loss_per_simplex` argument.
 
 #### The BalancingLearner can run many learners simultaneously.
 Frequently, more than one function (learner) needs to run at once, to do this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
