@@ -30,11 +30,11 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-A better alternative which improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data. [@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent] <!-- cite i.e., hydrodynamics-->
-Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum). [@@takhtaganov2018adaptive]
-If the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive], see Fig. @fig:algo.
-Such a sampling strategy would trivially speedup many simulations.
-One of the most significant complications here is to parallelize this algorithm, as it requires a lot of bookkeeping and planning ahead.
+An alternative, that improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data[@gramacy2004parameter; @de1995adaptive; @castro2008active; @chen2017intelligent]. <!-- cite i.e., hydrodynamics-->
+Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@@takhtaganov2018adaptive].
+However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive].
+Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
+Here, the complexity arises when parallelizing this algorithm, because this requires a lot of bookkeeping and planning.
 
 ![Visualization of a 1-D point choosing algorithm for a black box function (grey).
 We start by calculating the two boundary points.
@@ -45,19 +45,20 @@ The loss function in this example is the curvature loss.
 ](figures/algo.pdf){#fig:algo}
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
-To facilitate parallelization, the algorithm should be local, meaning that the information updates are only in a region around the newly calculated point.
-Additionally, the algorithm should also be fast in order to handle many parallel workers that calculate the function and request new points.
+To handle many parallel workers that calculate the function values and request new points, the algorithm needs to have a low computational overhead.
+Requiring that, when a new point has been calculated, that the information updates are local (only in a region around the newly calculated point), will reduce the time complexity of the algorithm.
 A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
-For a one-dimensional function with three points known (its boundary points and a point in the center), such a simple algorithm would consist of the following steps:
+For a one-dimensional function with three points known (its boundary points and a point in the center), such a simple algorithm consists of the following steps:
 (1) keep all points $x$ sorted, where two consecutive points define an interval,
 (2) calculate the distance for each interval $L_{i, i+1}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}}$,
 (3) pick a new point $x_\textrm{new}$ in the middle of the interval with the largest $L$, creating two new intervals around that point,
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
+
 In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the former example.
-Here we associate a *local loss* to each of the *candidate points* within an interval, and choose the points with the largest loss.
-In the case of the integration algorithm, the loss is the error estimate.
-The most significant advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
+Here we associate a *local loss* to each interval and pick a *candidate point* inside the interval with the largest loss.
+For example, in the case of the integration algorithm, the loss is the error estimate.
+The advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
 We see that when the function has a distinct feature---such as with the peak and tanh---adaptive sampling performs much better.
