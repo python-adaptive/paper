@@ -30,9 +30,9 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-An alternative, that improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data[@Gramacy2004; @de1995adaptive; @castro2008active; @Chen2017]. <!-- cite i.e., hydrodynamics-->
-Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@@Takhtaganov2018].
-However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature[@mathematica_adaptive].
+An alternative, that improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017]. <!-- cite i.e., hydrodynamics-->
+Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@Takhtaganov2018].
+However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature [@Wolfram2011].
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
 Here, the complexity arises when parallelizing this algorithm, because this requires a lot of bookkeeping and planning.
 
@@ -73,7 +73,7 @@ In all cases using Adaptive results in a higher fidelity plot.
 
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
-We provide a reference implementation, the open-source Python package called Adaptive[@Nijholt2019], which has previously been used in several scientific publications[@Vuik2018; @Laeven2019; @Bommer2019; @Melo2019].
+We provide a reference implementation, the open-source Python package called Adaptive [@Nijholt2019], which has previously been used in several scientific publications [@Vuik2018; @Laeven2019; @Bommer2019; @Melo2019].
 It has algorithms for $f \colon \R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
 Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for different classes of functions.
 It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
@@ -88,9 +88,9 @@ To explain the relation of our approach with prior work, we discuss several exis
 This is not a systematic review of all these fields, but rather, we aim to identify the important traits and design considerations.
 
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
-Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters and, thereby, reduce the cost of experimentation.[@Emery1998]
+Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters and, thereby, reduce the cost of experimentation [@Emery1998].
 It works with many degrees of freedom and can consider constraints, for example when the sample space contains regions that are infeasible for practical reasons.
-One form of OED is response-adaptive design[@hu2006theory], which concerns the adaptive sampling of designs for statistical experiments.
+One form of OED is response-adaptive design [@Hu2006], which concerns the adaptive sampling of designs for statistical experiments.
 Here, the acquired data (i.e. the observations) are used to estimate the uncertainties of a certain desired parameter.
 It then suggests further experiments that will optimally reduce these uncertainties.
 In this step of the calculation Bayesian statistics is frequently used.
@@ -100,21 +100,21 @@ In a typical non-adaptive experiment decisions on which experiments to perform, 
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
 In order to minimize the number of function evaluations, one can use adaptive sampling routines.
-For example, for one-dimensional functions, WolframResearch[@WolframResearch] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object that samples the function more densely in regions with high curvature; however, details on the algorithm are not published.
+For example, for one-dimensional functions, Mathematica [@WolframResearch] implements a `FunctionInterpolation` class that takes the function, $x_\textrm{min}$, and $x_\textrm{max}$, and returns an object that samples the function more densely in regions with high curvature; however, details on the algorithm are not published.
 Subsequently, we can query this object for points in between $x_\textrm{min}$ and $x_\textrm{max}$, and get the interpolated value, or we can use it to plot the function without specifying a grid.
 Another application for adaptive sampling is numerical integration.
 It works by estimating the integration error of each interval and then minimizing the sum of these errors greedily.
-For example, the `CQUAD` algorithm[@Gonnet2010] in the GNU Scientific Library[@Galassi1996] implements a more sophisticated strategy and is a doubly-adaptive general-purpose integration routine which can handle most types of singularities.
-In general, it requires more function evaluations than the integration routines in `QUADPACK`[@Galassi1996]; however, it works more often for difficult integrands.
+For example, the `CQUAD` algorithm [@Gonnet2010] in the GNU Scientific Library [@Galassi1996] implements a more sophisticated strategy and is a doubly-adaptive general-purpose integration routine which can handle most types of singularities.
+In general, it requires more function evaluations than the integration routines in `QUADPACK` [@Galassi1996]; however, it works more often for difficult integrands.
 It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by adding more points---that do not lie on a regular grid---to each interval.
 
 #### PDE solvers and computer graphics use adaptive meshing.
-Hydrodynamics[@Berger1989; @Berger1984] and astrophysics[@Klein1999] use an adaptive refinement of the triangulation mesh on which a partial differential equation is discretized.
+Hydrodynamics [@Berger1989; @Berger1984] and astrophysics [@Klein1999] use an adaptive refinement of the triangulation mesh on which a partial differential equation is discretized.
 By providing smaller mesh elements in regions with a higher variation of the solution, they reduce the amount of data and calculation needed at each step of time propagation.
 The remeshing at each time step happens globally, and this is an expensive operation.
 Therefore, mesh optimization does not fit our workflow because expensive global updates should be avoided.
-Computer graphics uses similar adaptive methods where a smooth surface can represent a surface via a coarser piecewise linear polygon mesh, called a subdivision surface[@DeRose1998].
-An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field; this is called anisotropic meshing[@Alliez2003].
+Computer graphics uses similar adaptive methods where a smooth surface can represent a surface via a coarser piecewise linear polygon mesh, called a subdivision surface [@DeRose1998].
+An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field; this is called anisotropic meshing [@Alliez2003].
 
 # Design constraints and the general algorithm
 
@@ -201,7 +201,7 @@ By adding the two loss functions, we can combine the 3D area loss to exploit int
 ## Line simplification loss
 
 #### The line simplification loss is based on an inverse Visvalingam’s algorithm.
-Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse.[@Visvalingam1990]
+Inspired by a method commonly employed in digital cartography for coastline simplification, Visvalingam's algorithm, we construct a loss function that does its reverse [@Visvalingam1990].
 Here, at each point (ignoring the boundary points), we compute the effective area associated with its triangle, see Fig. @fig:line_loss(b).
 The loss then becomes the average area of two adjacent triangles.
 By Taylor expanding $f$ around $x$ it can be shown that the area of the triangles relates to the contributions of the second derivative.
@@ -232,8 +232,8 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 ## A parallelizable adaptive integration algorithm based on cquad
 
 #### The `cquad` algorithm belongs to a class that is parallelizable.
-In Sec. @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD`.[@Gonnet2010]
-This algorithm uses a Clenshaw-Curtis quadrature rules [@Clenshaw1960] of increasing degree $d$ in each interval.
+In Sec. @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD` [@Gonnet2010].
+This algorithm uses a Clenshaw-Curtis quadrature rules of increasing degree $d$ in each interval [@Clenshaw1960].
 The error estimate is $\sqrt{\int{\left(f_0(x) - f_1(x)\right)^2}}$, where $f_0$ and $f_1$ are two successive interpolations of the integrand.
 To reach the desired total error, intervals with the maximum absolute error are improved.
 Either (1) the degree of the rule is increased or (2) the interval is split if either the function does not appear to be smooth or a rule of maximum degree ($d=4$) has been reached.
@@ -339,14 +339,14 @@ bal_learner = BalancingLearner(learners)
 runner = Runner(bal_learner, goal)
 
 ```
-For more details on how to use Adaptive, we recommend reading the tutorial inside the documentation [@Nijholt].
+For more details on how to use Adaptive, we recommend reading the tutorial inside the documentation [@Nijholt2018].
 
 # Possible extensions
 
 #### Anisotropic triangulation would improve the algorithm.
 The current implementation of choosing the candidate point inside a simplex (triangle in 2D) with the highest loss, for the `LearnerND`, works by either picking a point (1) in the center of the simplex or (2) by picking a point on the longest edge of the simplex.
 The choice depends on the shape of the simplex, where the algorithm tries to create regular simplices.
-Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation[@Dyn1990].
+Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation [@Dyn1990].
 This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
 
 #### Learning stochastic functions is a promising direction.

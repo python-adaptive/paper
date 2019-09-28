@@ -18,6 +18,7 @@
 \usepackage{tabularx}
 \usepackage{microtype}
 \usepackage{babel}
+\usepackage{textcomp}
 \hypersetup{pdfauthor={$for(author)$$author.name$$sep$, $endfor$},pdftitle={$if(title)$$title$$endif$}}
 
 \setcounter{secnumdepth}{4}
