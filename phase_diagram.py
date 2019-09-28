@@ -1,5 +1,3 @@
-
-
 import inspect
 import operator
 import sys
@@ -13,7 +11,6 @@ import numpy as np
 import scipy.constants
 from kwant.continuum.discretizer import discretize
 
-import adaptive
 import pfaffian as pf
 
 assert sys.version_info >= (3, 6), "Use Python ≥3.6"
@@ -373,7 +370,6 @@ def apply_peierls_to_template(template, xyz_offset=(0, 0, 0)):
 
 
 def get_offset(shape, start, lat):
-    a = np.max(lat.prim_vecs)
     coords = [site.pos for site in lat.shape(shape, start)()]
     xyz_offset = np.mean(coords, axis=0)
     return xyz_offset
