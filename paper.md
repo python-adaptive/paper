@@ -30,7 +30,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-An alternative, that improves the simulation efficiency is to choose new, potentially interesting points in $X$ based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017]. <!-- cite i.e., hydrodynamics-->
+An alternative, which improves the simulation efficiency, is to choose new potentially interesting points in $X$, based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017]. <!-- cite i.e., hydrodynamics-->
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@Takhtaganov2018].
 However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature [@Wolfram2011].
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
@@ -55,7 +55,7 @@ For a one-dimensional function with three points known (its boundary points and 
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
 
-In this paper, we describe a class of algorithms that rely on local criteria for sampling, such as in the former example.
+In this paper, we present a class of algorithms that rely on local criteria for sampling, such as in the former example.
 Here we associate a *local loss* to each interval and pick a *candidate point* inside the interval with the largest loss.
 For example, in the case of the integration algorithm, the loss is the error estimate.
 The advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
