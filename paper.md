@@ -94,7 +94,7 @@ One form of OED is response-adaptive design [@Hu2006], which concerns the adapti
 Here, the acquired data (i.e. the observations) are used to estimate the uncertainties of a certain desired parameter.
 It then suggests further experiments that will optimally reduce these uncertainties.
 In this step of the calculation Bayesian statistics is frequently used.
-Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples.
+Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples. <!-- references missing! -->
 In a typical non-adaptive experiment decisions on which experiments to perform, are made in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
@@ -118,23 +118,27 @@ An example of such a polygonal remeshing method is one where the polygons align 
 
 # Design constraints and the general algorithm
 
-#### We aim to sample low dimensional low to intermediate cost functions in parallel.
+#### We aim to sample low to intermediate cost functions in parallel.
 The general algorithm that we describe in this paper works best for low to intermediate cost functions.
 The point suggestion step happens in a single sequential process while the function executions can be in parallel.
-This means that to benefit from an adaptive sampling algorithm $t_\textrm{function} / N_\textrm{workers} \gg t_\textrm{suggest}$ must hold, here $t_\textrm{function}$ is the average function execution time, $N_\textrm{workers}$ the number of parallel processes, and $t_\textrm{suggest}$ the time it takes to suggest a new point.
-Very fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large; nonetheless, a large class of functions is inside the right regime for Adaptive to be beneficial.
-Further, because of the curse of dimensionality---the sparsity of space in higher dimensions---our local algorithm works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
+This means that to benefit from an adaptive sampling algorithm, that the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
+Extremely fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
+We are interested in an intermediate case, when one may not fully run a fitting of all available data at each step, still a large class of functions is inside the right regime for adaptive sampling to be beneficial.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
-To minimize $t_\textrm{suggest}$ and equivalently make the point suggestion algorithm as fast as possible, we propose to assign a loss to each interval.
-This loss is determined only by the function values of the points inside that interval and optionally of its neighbouring intervals too.
-The local loss function values then serve as a criterion for choosing the next point by virtue of choosing a new candidate point inside the interval with the maximum loss.
+Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use a priority queue where we are keeping track of the subdomains containing candidate points (intervals in 1D.)
+As we may not recompute this priority queue each time a new point is evaluated, only a fraction of the points can be updated.
+That means that whatever priority we set to the points, it needs to be local.
+We call this priority the loss, and it is determined only by the function values of the points inside that subsubdomain and optionally of its neighbouring intervals.
+The loss then serves as a criterion for choosing the next point by virtue of choosing a new candidate point inside the subdomain with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
 The amortized complexity of the point suggestion algorithm is, therefore, $\mathcal{O}(1)$.
+Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
+The algorithm therefore works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance.
-This loss will suggest to sample a point in the middle of an interval with the largest Euclidean distance and thereby ensure the continuity of the function.
+This loss will suggest to sample a point in the middle of an interval (subdomain) with the largest distance and thereby ensure the continuity of the function.
 A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
 
