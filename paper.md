@@ -129,7 +129,7 @@ We are interested in an intermediate case, when one may not fully run a fitting 
 Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use a priority queue where we are keeping track of the subdomains containing candidate points (intervals in 1D.)
 As we may not recompute this priority queue each time a new point is evaluated, only a fraction of the points can be updated.
 That means that whatever priority we set to the points, it needs to be local.
-We call this priority the loss, and it is determined only by the function values of the points inside that subsubdomain and optionally of its neighbouring intervals.
+We call this priority of each subdomain the loss, and it is determined only by the function values of the points inside that subdomain and optionally of its neighbouring subdomains.
 The loss then serves as a criterion for choosing the next point by virtue of choosing a new candidate point inside the subdomain with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
 The amortized complexity of the point suggestion algorithm is, therefore, $\mathcal{O}(1)$.
@@ -145,16 +145,16 @@ Figure @fig:Learner1D shows a comparison between a result using this loss and a 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
 The algorithm needs to be able to suggest multiple points at the same time and remember which points it suggests.
-When a new point $\bm{x}_\textrm{new}$ with the largest loss $L_\textrm{max}$ is suggested, the interval it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
-A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created intervals until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neigbors})$ of these new intervals, where $L \ge L_\textrm{temp}$.
+When the subdomain with the largest loss $L_\textrm{max}$---with a corresponding candidate point $\bm{x}_\textrm{new}$ inside that subdomain---is selected; the subdomain it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
+A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created subdomains, until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neighbors})$ of these new subdomains, where $L \ge L_\textrm{temp}$.
 For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assigning the interpolated value to $y_\textrm{new}$ until it is known.
 When querying $n>1$ points, the above procedure repeats $n$ times.
 
 #### In general local loss functions only have a logarithmic overhead.
-Due to the local nature of the loss function, the asymptotic complexity is logarithmic.
-This is because Adaptive stores the losses per interval in a max-heap
-When asking for a new candidate point, the top entry is picked with $\mathcal{O}(1)$.
-The interval then splits into $N$ new intervals, as explained in the previous paragraph, its losses have to be inserted into the heap again with $\mathcal{O}(\log{n})$.
+Efficient data structures allow to implement such an algorithm with a low overhead.
+For example, using a max-heap allows to select the subdomain with the maximum loss with an overhead of $\mathcal{O}(1)$.
+The subdomain then splits into $N$ new subdomains, as explained in the previous paragraph, and its losses have to be inserted into the heap again with $\mathcal{O}(\log{n})$.
+This is a pure $\mathcal{O}(\log{n})$ without amortization.
 
 # Loss function design
 
