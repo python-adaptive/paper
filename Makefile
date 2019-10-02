@@ -7,7 +7,7 @@ paper.bbl: paper.tex paper.bib
 	bibtex paper.aux
 
 paper.tex: paper.md revtex.template
-	pandoc -s --filter pandoc-fignos --filter pandoc-citeproc --filter pandoc-crossref --natbib paper.md -o paper.tex --bibliography paper.bib --abbreviations=abbreviations.txt --listings --template revtex.template
+	pandoc -s --filter pandoc-fignos --filter pandoc-citeproc --filter pandoc-crossref --natbib paper.md -o paper.tex --bibliography paper.bib --abbreviations=abbreviations.txt --wrap=preserve --listings --template revtex.template
 
 .PHONY: clean
 clean:
