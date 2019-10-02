@@ -11,7 +11,7 @@ abstract: |
   These sweeps of parameters can potentially make the simulations prohibitively expensive.
   Therefore, when evaluating a function numerically, it is advantageous to sample it more densely in the interesting regions (called adaptive sampling) instead of evaluating it on a manually-defined homogeneous grid.
   Such adaptive algorithms exist within the machine learning field.
-  These mehods can suggest a new point to calculate based on \textit{all} existing data at that time; however, this is an expensive operation.
+  These methods can suggest a new point to calculate based on \textit{all} existing data at that time; however, this is an expensive operation.
   An alternative is to use local algorithms---in contrast to the previously mentioned global algorithms---which can suggest a new point, based only on the data in the immediate vicinity of a new point.
   This approach works well, even when using hundreds of computers simultaneously because the point suggestion algorithm is cheap (fast) to evaluate.
   We provide a reference implementation in Python and show its performance.
@@ -34,9 +34,9 @@ An alternative, which improves the simulation efficiency, is to choose new poten
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@Takhtaganov2018].
 However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature [@Wolfram2011].
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
-Here, the complexity arises when parallelizing this algorithm, because this requires a lot of bookkeeping and planning.
+Here, the complexity arises when parallelizing this algorithm because this requires a lot of bookkeeping and planning.
 
-![Visualization of a 1-D point choosing algorithm for a black box function (grey).
+![Visualization of a 1-D point choosing algorithm for a black-box function (grey).
 We start by calculating the two boundary points.
 Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
 Each interval has a loss $L_{i,i+1}$ associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$ and optionally of $N$ next nearest neighbouring intervals.
@@ -55,7 +55,7 @@ For a one-dimensional function with three points known (its boundary points and 
 (4) calculate $f(x_\textrm{new})$,
 (5) repeat the previous steps, without redoing calculations for unchanged intervals.
 
-In this paper, we present a class of algorithms that rely on local criteria for sampling, such as in the former example.
+In this paper, we present a class of algorithms that rely on local criteria for sampling, such as in the above example.
 Here we associate a *local loss* to each interval and pick a *candidate point* inside the interval with the largest loss.
 For example, in the case of the integration algorithm, the loss is the error estimate.
 The advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
@@ -66,8 +66,8 @@ When the features are homogeneously spaced, such as with the wave packet, adapti
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
 On the left is the function $f(x) = x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
-In the middle a topological phase diagram from \onlinecite{Nijholt2016}, where the  function can take the values -1 or 1.
-On the right we plot level crossings for a two level quantum system.
+In the middle a topological phase diagram from \onlinecite{Nijholt2016}, where the function can take the values -1 or 1.
+On the right, we plot level crossings for a two-level quantum system.
 In all cases using Adaptive results in a higher fidelity plot.
 ](figures/Learner2D.pdf){#fig:Learner2D}
 
@@ -89,13 +89,13 @@ This is not a systematic review of all these fields, but rather, we aim to ident
 
 #### Experiment design uses Bayesian sampling because the computational costs are not a limitation.
 Optimal experiment design (OED) is a field of statistics that minimizes the number of experimental runs needed to estimate specific parameters and, thereby, reduce the cost of experimentation [@Emery1998].
-It works with many degrees of freedom and can consider constraints, for example when the sample space contains regions that are infeasible for practical reasons.
+It works with many degrees of freedom and can consider constraints, for example, when the sample space contains regions that are infeasible for practical reasons.
 One form of OED is response-adaptive design [@Hu2006], which concerns the adaptive sampling of designs for statistical experiments.
-Here, the acquired data (i.e. the observations) are used to estimate the uncertainties of a certain desired parameter.
+Here, the acquired data (i.e., the observations) are used to estimate the uncertainties of a certain desired parameter.
 It then suggests further experiments that will optimally reduce these uncertainties.
 In this step of the calculation Bayesian statistics is frequently used.
 Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples. <!-- references missing! -->
-In a typical non-adaptive experiment decisions on which experiments to perform, are made in advance.
+In a typical non-adaptive experiment, decisions on which experiments to perform are made in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
 Plotting a low dimensional function in between bounds requires one to evaluate the function on sufficiently many points such that when we interpolate values in between data points, we get an accurate description of the function values that were not explicitly calculated.
@@ -123,17 +123,17 @@ The general algorithm that we describe in this paper works best for low to inter
 The point suggestion step happens in a single sequential process while the function executions can be in parallel.
 This means that to benefit from an adaptive sampling algorithm, that the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
 Extremely fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
-We are interested in an intermediate case, when one may not fully run a fitting of all available data at each step, still a large class of functions is inside the right regime for adaptive sampling to be beneficial.
+We are interested in an intermediate case, when one may not fully run a fitting of all available data at each step; still, a large class of functions is inside the right regime for adaptive sampling to be beneficial.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use a priority queue where we are keeping track of the subdomains containing candidate points (intervals in 1D.)
 As we may not recompute this priority queue each time a new point is evaluated, only a fraction of the points can be updated.
 That means that whatever priority we set to the points, it needs to be local.
-We call this priority of each subdomain the loss, and it is determined only by the function values of the points inside that subdomain and optionally of its neighbouring subdomains.
+We call this priority of each subdomain the loss, and it is determined only by the function values of the points inside that subdomain and optionally of its neighboring subdomains.
 The loss then serves as a criterion for choosing the next point by virtue of choosing a new candidate point inside the subdomain with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
 Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
-The algorithm therefore works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
+The algorithm, therefore, works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 The algorithm can be summarized as follows, where `f` is the function to evaluate, `loss` is the loss function, and `heap_push`, `head_pop` and `heap_max` are functions for manipulating a max-heap.
 
@@ -156,22 +156,22 @@ while heap_max(intervals)[0] > $\epsilon$:
 ```
 
 In the above, `loss` only gets the data associated with a single interval;
-in order to support loss functions that rely on data from neighboring intervals we would need to maintain a separate datastructure that encodes the neighborhood information.
+in order to support loss functions that rely on data from neighboring intervals, we would need to maintain a separate data structure that encodes the neighborhood information.
 For example, if `data` were a binary tree storing `(x, f(x))` then we could query neighboring points in $\mathcal{O}(\log n)$ time, where $n$ is the number of subdomains.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance.
 This loss will suggest to sample a point in the middle of an interval (subdomain) with the largest distance and thereby ensure the continuity of the function.
-A more complex loss function that also takes the first neighbouring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
+A more complex loss function that also takes the first neighboring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
 Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
 The parallel version of this algorithm proposes candidate points based on the existing data and the pending points.
-To accomodate that we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
+To accommodate that, we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
 Adding a pending point to the dataset splits the subdomain to which it belongs into several smaller subdomains and assigns a fraction of the original loss to these subdomains as an estimate.
 Providing the function value of a pending point then updates the loss estimate using the new data.
-Because the loss function is local, $\mathcal{O}(1)$ subdomains are involved in both operations, therfore resulting in an $\mathcal{O}(1)$ computational cost.
+Because the loss function is local, $\mathcal{O}(1)$ subdomains are involved in both operations, therefore resulting in a $\mathcal{O}(1)$ computational cost.
 
 #### We summarize the algorithm with pseudocode
 This is illustrated in the following algorithm, where `parallel_map` takes a function and array of inputs and evaluates the function on each input in parallel, and `n_per_round` is the number of parallel evaluations to do at a time.
@@ -212,16 +212,16 @@ while heap_max(intervals)[0] > $\epsilon$:
     data[xs[i]] $\gets$ fs[i]
 ```
 
-#### The parallel algorithm has an logarithmic overhead when combined with an appropriate datastructure
-The key datastructure in the parallel algorithm is the priority queue of subdomains.
+#### The parallel algorithm has a logarithmic overhead when combined with an appropriate data structure
+The key data structure in the parallel algorithm is the priority queue of subdomains.
 It must support efficient removal and insertion, as well as finding the subdomain with the maximal loss.
 An example of such a datastructure is a red--black tree <!-- reference here --> or a skip list <!-- reference here -->.
-Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all the three operations.
-In the reference implementation we use the SortedContainers Python package that provides an efficient implementation of such a datastructure optimized for realistic sizes, rather that asymptotic complexity.
+Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all three operations.
+In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
 
 # Loss function design
 
-#### Sampling in different problems pursues diffent goals
+#### Sampling in different problems pursues different goals
 <!-- Listing possible goals, such as integration, plotting (function appropriation), and maximization, isoline or isosurface finding.  -->
 
 #### Different loss functions tailor sampling performance to different goals
@@ -258,11 +258,11 @@ where $\epsilon$ is the smallest resolution we want to sample.
 #### Asymptotically dense sampling is achieved by adding subdomain volume to the loss
 In two-dimensions (2D), subdomains are defined by triangles, where its vertices are known data points.
 Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result.
-A distance loss equivalent in 2D, is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
-Using this loss function some narrow features in otherwise flat regions might not be discovered initially.
+A distance loss equivalent in 2D is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
+Using this loss function, some narrow features in otherwise flat regions might not be discovered initially.
 It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
 A loss functions that ensure this is a homogeneous loss function that returns the 2D area span by the $x, y$ coordinates.
-However, this loss function does not use the function-values and is therefore by itself is not an efficient solution.
+However, this loss function does not use the function-values and is, therefore, by itself is not an efficient solution.
 Ideally, interesting regions are sampled more densely, while simultaneously new potentially interesting regions are also discovered.
 By adding the two loss functions, we can combine the 3D area loss to exploit interesting regions, while the 2D area loss explores less densely sampled regions that might contain interesting features.
 
