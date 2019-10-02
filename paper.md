@@ -30,7 +30,7 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 
 #### Choosing new points based on existing data improves the simulation efficiency.
 <!-- This should convey the point that it is advantageous to do this. -->
-An alternative, which improves the simulation efficiency, is to choose new potentially interesting points in $X$, based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017]. <!-- cite i.e., hydrodynamics-->
+An alternative, which improves the simulation efficiency, is to choose new potentially interesting points in $X$, based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017].
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@Takhtaganov2018].
 However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature [@Wolfram2011].
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
@@ -298,7 +298,7 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 ## A parallelizable adaptive integration algorithm based on cquad
 
 #### The `cquad` algorithm belongs to a class that is parallelizable.
-In Sec. @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD` [@Gonnet2010].
+In @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD` [@Gonnet2010].
 This algorithm uses a Clenshaw-Curtis quadrature rules of increasing degree $d$ in each interval [@Clenshaw1960].
 The error estimate is $\sqrt{\int{\left(f_0(x) - f_1(x)\right)^2}}$, where $f_0$ and $f_1$ are two successive interpolations of the integrand.
 To reach the desired total error, intervals with the maximum absolute error are improved.
