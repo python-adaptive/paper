@@ -9,7 +9,7 @@ import requests
 import yaml
 
 
-def replace_key(key, bib_entry):
+def edit_raw_bibtex_entry(key, bib_entry):
     bib_type, *_ = bib_entry.split("{")
     _, *rest = bib_entry.split(",")
     rest = ",".join(rest)
@@ -40,8 +40,6 @@ def replace_key(key, bib_entry):
         ),  # fix for PhysRevLett.96.026804
     ]
 
-    # I got these by using JabRef and converting to abbr journals
-    # and parsing the git diff.
     journals = [
         ("Advanced Materials", "Adv. Mater."),
         ("Annals of Physics", "Ann. Phys."),
@@ -73,10 +71,6 @@ def replace_key(key, bib_entry):
         ("Science Advances", "Sci. Adv."),
         ("Scientific Reports", "Sci. Rep."),
         ("Semiconductor Science and Technology", "Semicond. Sci. Technol."),
-    ]
-
-    # Manually added
-    journals += [
         (
             "Annual Review of Condensed Matter Physics",
             "Annu. Rev. Condens. Matter Phys.",
@@ -108,12 +102,12 @@ def doi2bib(doi):
     return r.text
 
 
-fname = 'paper.yaml'
+fname = "paper.yaml"
 print("Reading: ", fname)
 
 with open(fname) as f:
-    mapping = yaml.safe_load(f)
-dois = dict(sorted(mapping.items()))
+    dois = yaml.safe_load(f)
+dois = dict(sorted(dois.items()))
 
 
 with ThreadPoolExecutor() as ex:
@@ -121,19 +115,19 @@ with ThreadPoolExecutor() as ex:
     bibs = list(futs)
 
 
-entries = [replace_key(key, bib) for key, bib in zip(dois.keys(), bibs)]
+entries = [edit_raw_bibtex_entry(key, bib) for key, bib in zip(dois.keys(), bibs)]
 
 
-with open("paper.bib", "w") as outfile:
+with open("paper.bib", "w") as out_file:
     fname = "not_on_crossref.bib"
-    outfile.write("@preamble{ {\\providecommand{\\BIBYu}{Yu} } }\n\n")
-    outfile.write(f"\n% Below is from `{fname}`.\n\n")
-    with open(fname) as infile:
-        outfile.write(infile.read())
-    outfile.write("\n% Below is from `paper.yaml` files.\n\n")
+    out_file.write("@preamble{ {\\providecommand{\\BIBYu}{Yu} } }\n\n")
+    out_file.write(f"\n% Below is from `{fname}`.\n\n")
+    with open(fname) as in_file:
+        out_file.write(in_file.read())
+    out_file.write("\n% Below is from `paper.yaml`.\n\n")
     for e in entries:
-        for line in e.split('\n'):
+        for line in e.split("\n"):
             # Remove the url line
             if "url = {" not in line:
-                outfile.write(f"{line}\n")
-        outfile.write('\n')
+                out_file.write(f"{line}\n")
+        out_file.write("\n")
