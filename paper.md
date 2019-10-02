@@ -66,7 +66,7 @@ When the features are homogeneously spaced, such as with the wave packet, adapti
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different two-dimensional functions where the number of points in each column is identical.
 On the left is the function $f(x) = x + a ^ 2 / (a ^ 2 + (x - x_\textrm{offset}) ^ 2)$.
-In the middle a topological phase diagram from [\onlinecite{Nijholt2016}], where the  function can take the values -1 or 1.
+In the middle a topological phase diagram from \onlinecite{Nijholt2016}, where the  function can take the values -1 or 1.
 On the right we plot level crossings for a two level quantum system.
 In all cases using Adaptive results in a higher fidelity plot.
 ](figures/Learner2D.pdf){#fig:Learner2D}
@@ -74,7 +74,7 @@ In all cases using Adaptive results in a higher fidelity plot.
 
 #### We provide a reference implementation, the Adaptive package, and demonstrate its performance.
 We provide a reference implementation, the open-source Python package called Adaptive [@Nijholt2019], which has previously been used in several scientific publications [@Vuik2018; @Laeven2019; @Bommer2019; @Melo2019].
-It has algorithms for $f \colon R^N \to \R^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\R$; and the averaging of stochastic functions.
+It has algorithms for $f \colon \mathbb{R}^N \to \mathbb{R}^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\mathbb{R}$; and the averaging of stochastic functions.
 Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for different classes of functions.
 It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
 It provides auxiliary functionality such as live-plotting, inspecting the data as the calculation is in progress, and automatically saving and loading of the data.
