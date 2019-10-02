@@ -108,13 +108,11 @@ def doi2bib(doi):
     return r.text
 
 
-bibs = [f for f in glob.glob("*yaml") if "tmp.yaml" not in f]
-print("Reading: ", bibs)
+fname = 'paper.yaml'
+print("Reading: ", fname)
 
-mapping = {}
-for fname in bibs:
-    with open(fname) as f:
-        mapping = {**mapping, **yaml.safe_load(f)}
+with open(fname) as f:
+    mapping = yaml.safe_load(f)
 dois = dict(sorted(mapping.items()))
 
 
@@ -125,14 +123,14 @@ with ThreadPoolExecutor() as ex:
 
 entries = [replace_key(key, bib) for key, bib in zip(dois.keys(), bibs)]
 
-bib_files = glob.glob("not_on_crossref.bib")
+
 with open("paper.bib", "w") as outfile:
+    fname = "not_on_crossref.bib"
     outfile.write("@preamble{ {\\providecommand{\\BIBYu}{Yu} } }\n\n")
-    for fname in bib_files:
-        outfile.write(f"\n% Below is from `{fname}`.\n\n")
-        with open(fname) as infile:
-            outfile.write(infile.read())
-    outfile.write("\n% Below is from all `yaml` files.\n\n")
+    outfile.write(f"\n% Below is from `{fname}`.\n\n")
+    with open(fname) as infile:
+        outfile.write(infile.read())
+    outfile.write("\n% Below is from `paper.yaml` files.\n\n")
     for e in entries:
         for line in e.split('\n'):
             # Remove the url line
