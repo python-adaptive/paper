@@ -221,12 +221,20 @@ In the reference implementation we use the SortedContainers Python package that 
 
 # Loss function design
 
-#### A failure mode of such algorithms is sampling only a small neighbourhood of one point.
+#### Sampling in different problems pursues diffent goals
+<!-- Listing possible goals, such as integration, plotting (function appropriation), and maximization, isoline or isosurface finding.  -->
+
+#### Different loss functions tailor sampling performance to different goals
 The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
 For example, $1/x^2$ has a singularity at $x=0$ and will be sampled too densely around that singularity using this loss.
 We can avoid this by defining additional logic inside the loss function.
 
-#### A solution is to regularize the loss such that this would be avoided.
+#### Adding loss functions allows for balancing between multiple priorities.
+Different loss functions prioritize sampling different features.
+Adding loss functions allows for balancing between the multiple desired priorities.
+For example, combining a loss function that calculates the curvature with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
+
+#### Loss function regularization avoids singularities
 To avoid indefinitely sampling the function based on a distance loss alone, we can regularize the loss.
 A simple (but not optimal) strategy is to limit the size of each interval in the $x$ direction using,
 
@@ -247,13 +255,8 @@ L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
 
 where $\epsilon$ is the smallest resolution we want to sample.
 
-#### Adding loss functions allows for balancing between multiple priorities.
-Different loss functions prioritize sampling different features.
-Adding loss functions allows for balancing between the multiple desired priorities.
-For example, combining a loss function that calculates the curvature with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
-
-#### A desirable property is that eventually, all points should be sampled.
-In two-dimensions (2D), intervals are defined by triangles, where its vertices are known data points.
+#### Asymptotically dense sampling is achieved by adding subdomain volume to the loss
+In two-dimensions (2D), subdomains are defined by triangles, where its vertices are known data points.
 Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result.
 A distance loss equivalent in 2D, is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
 Using this loss function some narrow features in otherwise flat regions might not be discovered initially.
