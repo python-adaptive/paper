@@ -45,3 +45,4 @@ make:
   artifacts:
     paths:
       - paper.pdf
+      - paper.tex
