@@ -132,7 +132,6 @@ That means that whatever priority we set to the points, it needs to be local.
 We call this priority of each subdomain the loss, and it is determined only by the function values of the points inside that subdomain and optionally of its neighbouring subdomains.
 The loss then serves as a criterion for choosing the next point by virtue of choosing a new candidate point inside the subdomain with the maximum loss.
 This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
-The amortized complexity of the point suggestion algorithm is, therefore, $\mathcal{O}(1)$.
 Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
 The algorithm therefore works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
@@ -141,24 +140,24 @@ The algorithm can be summarized as follows, where `f` is the function to evaluat
 ```
 data $\gets$ empty_hashmap()
 intervals $\gets$ empty_max_heap()
-data[a] $\gets$ f(a)
-data[b] $\gets$ f(b)
+data[a] $\gets$ f(a)  # left bound
+data[b] $\gets$ f(b)  # right bound
 l $\gets$ loss(a, b, data[a], data[b])
 heap_push(intervals, (l, a, b))
 
 while heap_max(intervals)[0] > $\epsilon$:
-    _, a, b $\gets$ heap_pop(intervals)
-    m $\gets$ (a + b) / 2
-    data[m] $\gets$ f(m)
-    l_left $\gets$ loss(a, m, data[a], data[m])
-    l_right $\gets$ loss(m, b, data[m], data[b])
-    heap_push(intervals, (l_left, a, m))
-    heap_push(intervals, (l_right, m, b))
+  _, a, b $\gets$ heap_pop(intervals)
+  m $\gets$ (a + b) / 2
+  data[m] $\gets$ f(m)
+  l_left $\gets$ loss(a, m, data[a], data[m])
+  l_right $\gets$ loss(m, b, data[m], data[b])
+  heap_push(intervals, (l_left, a, m))
+  heap_push(intervals, (l_right, m, b))
 ```
 
 In the above, `loss` only gets the data associated with a single interval;
 in order to support loss functions that rely on data from neighboring intervals we would need to maintain a separate datastructure that encodes the neighborhood information.
-For example, if `data` were a binary tree storing `(x, f(x))` then we could query neighboring points in $\mathcal{O}(\log N)$ time.
+For example, if `data` were a binary tree storing `(x, f(x))` then we could query neighboring points in $\mathcal{O}(\log n)$ time, where $n$ is the number of subdomains.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance.
@@ -168,12 +167,13 @@ Figure @fig:Learner1D shows a comparison between a result using this loss and a 
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
-The algorithm needs to be able to suggest multiple points at the same time and remember which points it suggests.
-When the subdomain with the largest loss $L_\textrm{max}$---with a corresponding candidate point $\bm{x}_\textrm{new}$ inside that subdomain---is selected; the subdomain it belongs to splits up into $N$ new intervals (here $N$ depends on the dimensionality of the function $f$.)
-A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created subdomains, until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neighbors})$ of these new subdomains, where $L \ge L_\textrm{temp}$.
-For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assigning the interpolated value to $y_\textrm{new}$ until it is known.
-When querying $n>1$ points, the above procedure repeats $n$ times.
+The parallel version of this algorithm proposes candidate points based on the existing data and the pending points.
+To accomodate that we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
+Adding a pending point to the dataset splits the subdomain to which it belongs into several smaller subdomains and assigns a fraction of the original loss to these subdomains as an estimate.
+Providing the function value of a pending point then updates the loss estimate using the new data.
+Because the loss function is local, $\mathcal{O}(1)$ subdomains are involved in both operations, therfore resulting in an $\mathcal{O}(1)$ computational cost.
 
+#### We summarize the algorithm with pseudocode
 This is illustrated in the following algorithm, where `parallel_map` takes a function and array of inputs and evaluates the function on each input in parallel, and `n_per_round` is the number of parallel evaluations to do at a time.
 
 ```
@@ -212,11 +212,12 @@ while heap_max(intervals)[0] > $\epsilon$:
     data[xs[i]] $\gets$ fs[i]
 ```
 
-#### In general local loss functions only have a logarithmic overhead.
-Efficient data structures allow to implement such an algorithm with a low overhead.
-For example, using a max-heap allows to select the subdomain with the maximum loss with an overhead of $\mathcal{O}(1)$.
-The subdomain then splits into $N$ new subdomains, as explained in the previous paragraph, and its losses have to be inserted into the heap again with $\mathcal{O}(\log{n})$.
-This is a pure $\mathcal{O}(\log{n})$ without amortization.
+#### The parallel algorithm has an logarithmic overhead when combined with an appropriate datastructure
+The key datastructure in the parallel algorithm is the priority queue of subdomains.
+It must support efficient removal and insertion, as well as finding the subdomain with the maximal loss.
+An example of such a datastructure is a red--black tree <!-- reference here --> or a skip list <!-- reference here -->.
+Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all the three operations.
+In the reference implementation we use the SortedContainers Python package that provides an efficient implementation of such a datastructure optimized for realistic sizes, rather that asymptotic complexity.
 
 # Loss function design
 
