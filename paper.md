@@ -136,6 +136,30 @@ The amortized complexity of the point suggestion algorithm is, therefore, $\math
 Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
 The algorithm therefore works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
+The algorithm can be summarized as follows, where `f` is the function to evaluate, `loss` is the loss function, and `heap_push`, `head_pop` and `heap_max` are functions for manipulating a max-heap.
+
+```
+data $\gets$ empty_hashmap()
+intervals $\gets$ empty_max_heap()
+data[a] $\gets$ f(a)
+data[b] $\gets$ f(b)
+l $\gets$ loss(a, b, data[a], data[b])
+heap_push(intervals, (l, a, b))
+
+while heap_max(intervals)[0] > $\epsilon$:
+    _, a, b $\gets$ heap_pop(intervals)
+    m $\gets$ (a + b) / 2
+    data[m] $\gets$ f(m)
+    l_left $\gets$ loss(a, m, data[a], data[m])
+    l_right $\gets$ loss(m, b, data[m], data[b])
+    heap_push(intervals, (l_left, a, m))
+    heap_push(intervals, (l_right, m, b))
+```
+
+In the above, `loss` only gets the data associated with a single interval;
+in order to support loss functions that rely on data from neighboring intervals we would need to maintain a separate datastructure that encodes the neighborhood information.
+For example, if `data` were a binary tree storing `(x, f(x))` then we could query neighboring points in $\mathcal{O}(\log N)$ time.
+
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a loss function for a one-dimensional function is the interpoint distance.
 This loss will suggest to sample a point in the middle of an interval (subdomain) with the largest distance and thereby ensure the continuity of the function.
@@ -149,6 +173,44 @@ When the subdomain with the largest loss $L_\textrm{max}$---with a corresponding
 A temporary loss $L_\textrm{temp} = L_\textrm{max}/N$ is assigned to these newly created subdomains, until $f(\bm{x})$ is calculated and the temporary loss can be replaced by the actual loss $L \equiv L((\bm{x},\bm{y})_\textrm{new}, (\bm{x},\bm{y})_\textrm{neighbors})$ of these new subdomains, where $L \ge L_\textrm{temp}$.
 For a one-dimensional scalar function, this procedure is equivalent to temporarily using the function values of the neighbours of $x_\textrm{new}$ and assigning the interpolated value to $y_\textrm{new}$ until it is known.
 When querying $n>1$ points, the above procedure repeats $n$ times.
+
+This is illustrated in the following algorithm, where `parallel_map` takes a function and array of inputs and evaluates the function on each input in parallel, and `n_per_round` is the number of parallel evaluations to do at a time.
+
+```
+def get_next(data, intervals):
+  l, a, b, need_update $\gets$ heap_pop(intervals)
+  while need_update:
+    f_a $\gets$ data[a]
+    f_b $\gets$ data[b]
+    if f_a is None or f_b is None:
+      break
+    l $\gets$ loss(a, b, f_a, f_b)
+    heap_push(intervals, (l, a, b, False))
+    l, a, b, need_update $\gets$ heap_pop(intervals)
+  return (l, a, b)
+
+
+data $\gets$ empty_hashmap()
+intervals $\gets$ empty_max_heap()
+data[a] $\gets$ f(a)
+data[b] $\gets$ f(b)
+l $\gets$ loss(a, b, data[a], data[b])
+heap_push(intervals, (l, a, b))
+
+while heap_max(intervals)[0] > $\epsilon$:
+  xs $\gets$ empty_array(n_per_round)
+  for i in 0..n_per_round-1:
+    l, a, b $\gets$ get_next(data, intervals)
+    m $\gets$ (a + b) / 2
+    xs[i] $\gets$ m
+    heap_push(intervals, (l/2, a, m, True))
+    heap_push(intervals, (l/2, m, b, True))
+
+  fs $\gets$ parallel_map(f, xs)
+
+  for i in 0..n_per_round:
+    data[xs[i]] $\gets$ fs[i]
+```
 
 #### In general local loss functions only have a logarithmic overhead.
 Efficient data structures allow to implement such an algorithm with a low overhead.
