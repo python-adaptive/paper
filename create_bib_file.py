@@ -30,6 +30,11 @@ def edit_raw_bibtex_entry(key, bib_entry):
         ("Andreev", "{A}ndreev"),
         ("Kramers", "{K}ramers"),
         ("Kitaev", "{K}itaev"),
+        (r"{JornHoofwijk}", "Hoofwijk, Jorn"),  # fix for 10.5281/Zenodo.1182437
+        (
+            "NIRA DYN and DAVID LEVIN and SAMUEL RIPPA",
+            "Nira Dyn and David Levin and Samuel Rippa",
+        ),  # fix for  10.1093/imanum/10.1.137
         (
             r"metastable0and$\uppi$states",
             r"metastable $0$ and $\pi$ states",
@@ -102,10 +107,10 @@ def doi2bib(doi):
     return r.text
 
 
-fname = "paper.yaml"
-print("Reading: ", fname)
+fname_bib = "paper.yaml"
+print("Reading: ", fname_bib)
 
-with open(fname) as f:
+with open(fname_bib) as f:
     dois = yaml.safe_load(f)
 dois = dict(sorted(dois.items()))
 
@@ -119,12 +124,13 @@ entries = [edit_raw_bibtex_entry(key, bib) for key, bib in zip(dois.keys(), bibs
 
 
 with open("paper.bib", "w") as out_file:
-    fname = "not_on_crossref.bib"
+    fname_other = "not_on_crossref.bib"
+    out_file.write("Created automatically with `python create_bib_file.py`.\n\n")
     out_file.write("@preamble{ {\\providecommand{\\BIBYu}{Yu} } }\n\n")
-    out_file.write(f"\n% Below is from `{fname}`.\n\n")
-    with open(fname) as in_file:
+    out_file.write(f"\n% Below is from `{fname_other}`.\n\n")
+    with open(fname_other) as in_file:
         out_file.write(in_file.read())
-    out_file.write("\n% Below is from `paper.yaml`.\n\n")
+    out_file.write(f"\n% Below is from `{fname_bib}`.\n\n")
     for e in entries:
         for line in e.split("\n"):
             # Remove the url line
