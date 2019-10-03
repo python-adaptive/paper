@@ -21,8 +21,7 @@ RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-4.5.11-Linux-x86
     rm ~/miniconda.sh && \
     /opt/conda/bin/conda clean -tipsy && \
     ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-    echo "conda activate base" >> ~/.bashrc
+    echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc
 
 ENV TINI_VERSION v0.16.1
 ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
@@ -32,7 +31,8 @@ RUN mkdir /environments
 COPY environment.yml /environments/
 
 RUN conda-env create -f /environments/environment.yml && \
-    echo "conda activate revtex-markdown-paper" >> ~/.bashrc
+    # ensure that we activate the environment in any shell (Gitlab CI uses 'sh')
+    echo ". activate revtex-markdown-paper" >> /etc/profile
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
