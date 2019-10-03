@@ -222,13 +222,12 @@ In the reference implementation, we use the SortedContainers Python package that
 # Loss function design
 
 #### Sampling in different problems pursues different goals
-Not all goals are achieved by using an identical sampling strategy.
-Here, the specific problem determines the goal.
+Not all goals are achieved by using an identical sampling strategy; the specific problem determines the goal.
 For example, quadrature rules based integration requires a denser sampling of the sections where the uncertainty of the interpolation is highest, plotting (or function approximation) requires continuity of the approximation, maximization only cares about finding an optimum, and isoline or isosurface sampling aims to sample regions near the iso level denser.
 
 #### Different loss functions tailor sampling performance to different goals
-The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
-For example, $1/x^2$ has a singularity at $x=0$ and will be sampled too densely around that singularity using this loss.
+To plot a function, the interpoint distance minimizing loss function we mentioned previously, works on many functions; however, it is easy to write down a function where it will fail.
+For example, $1/x^2$ has a singularity at $x=0$ and will be sampled too densely around that singularity using a distance minimizing loss.
 We can avoid this by defining additional logic inside the loss function.
 
 #### Adding loss functions allows for balancing between multiple priorities.
