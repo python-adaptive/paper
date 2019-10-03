@@ -7,7 +7,21 @@ paper.bbl: paper.tex paper.bib
 	bibtex paper.aux
 
 paper.tex: paper.md pandoc/revtex.template
-	pandoc -s --filter pandoc-fignos --filter pandoc-citeproc --filter pandoc-crossref -M "crossrefYaml=pandoc/pandoc-crossref.yaml" --natbib paper.md -o paper.tex --bibliography paper.bib --abbreviations=pandoc/abbreviations.txt --wrap=preserve --listings --template pandoc/revtex.template
+	pandoc \
+        --read=markdown-auto_identifiers \
+        --filter=pandoc-fignos \
+        --filter=pandoc-citeproc \
+        --filter=pandoc-crossref \
+        --metadata="crossrefYaml=pandoc/pandoc-crossref.yaml" \
+        --output=paper.tex \
+        --bibliography=paper.bib \
+        --abbreviations=pandoc/abbreviations.txt \
+        --wrap=preserve \
+        --template=pandoc/revtex.template \
+        --standalone \
+        --natbib \
+        --listings \
+        paper.md
 
 .PHONY: clean
 clean:
