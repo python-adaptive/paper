@@ -185,10 +185,10 @@ while True:
   # the data at point 'x'
   subdomains_to_update = set(domain.subdomains_containing(x))
   if loss.n_neighbors > 0:
-    subdomains_to_update += set(
+    subdomains_to_update.update(set(
       domain.neighbors(d, loss.n_neighbors)
       for d in subdomains_to_update
-    )
+    ))
   for subdomain in subdomains_to_update:
     queue.update(subdomain, priority=loss(domain, subdomain, data))
 
