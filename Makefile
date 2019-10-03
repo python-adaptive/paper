@@ -23,6 +23,7 @@ paper.tex: paper.md pandoc/revtex.template
         --listings \
         paper.md
 
-.PHONY: clean
+.PHONY: all clean
+
 clean:
 	rm -f paper.pdf paper.aux paper.blg paper.bbl paper.log paper.tex paperNotes.bib
