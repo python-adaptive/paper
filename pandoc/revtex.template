@@ -24,22 +24,6 @@
 \setcounter{secnumdepth}{4}
 \setcounter{tocdepth}{4}
 
-\DeclareMathOperator{\e}{e}
-\DeclareMathOperator{\de}{d\!}
-\DeclareMathOperator{\Tr}{Tr}
-\DeclareMathOperator{\diag}{diag}
-\DeclareMathOperator{\Res}{Res}
-\DeclareMathOperator{\sgn}{sgn}
-\DeclareMathOperator{\Pf}{Pf}
-\DeclareMathOperator{\Det}{Det}
-\DeclareMathOperator{\rank}{rank}
-\DeclareMathOperator{\im}{Im}
-\DeclareMathOperator{\re}{Re}
-\newcommand{\kx}{k_x}
-\newcommand{\ky}{k_y}
-\newcommand{\meff}{m_\text{eff}}
-\newcommand{\R}{\mathbb{R}}
-
 \newcounter{CommentNumber}
 % \renewcommand{\paragraph}[1]{\stepcounter{CommentNumber}\belowpdfbookmark{#1}{\arabic{CommentNumber}}}
 
