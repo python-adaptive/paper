@@ -126,98 +126,98 @@ Extremely fast functions can be calculated on a dense grid, and extremely slow f
 We are interested in an intermediate case, when one may not fully run a fitting of all available data at each step; still, a large class of functions is inside the right regime for adaptive sampling to be beneficial.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
-Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use a priority queue where we are keeping track of the subdomains containing candidate points (intervals in 1D.)
-As we may not recompute this priority queue each time a new point is evaluated, only a fraction of the points can be updated.
-That means that whatever priority we set to the points, it needs to be local.
-We call this priority of each subdomain the loss, and it is determined only by the function values of the points inside that subdomain and optionally of its neighboring subdomains.
-The loss then serves as a criterion for choosing the next point by virtue of choosing a new candidate point inside the subdomain with the maximum loss.
-This means that upon adding new data points, only the intervals near the new point needs to have their loss value updated.
+Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use the following approach, which operates on a constant-size subset of the data to determine which point to suggest next.
+We keep track of the subdomains in a priority queue, where each subdomain is assigned a priority called the "loss".
+To suggest a new point we remove the subdomain with the largest loss from the priority queue and select a new point $x_\textrm{new}$ from within it (typically in the centre)
+This splits the subdomain into several smaller subdomains $\{S_i\}$ that each contain $x_\textrm{new}$ on their boundaries.
+After evaluating the function at $x_\textrm{new}$ we must then recompute the losses using the new data.
+We choose to consider loss functions that are "local", i.e. the loss for a subdomain depends only on the points contained in that subdomain and possibly a (small) finite number of neighboring subdomains.
+This means that we need only recalculate the losses for subdomains that are "close" to $x_\textrm{new}$.
+Having computed the new losses we must then insert the $\{S_i\}$ into the priority queue, and also update the priorities of the neighboring subdomains, if their loss was recalculated.
+After these insertions and updates we are ready to suggest the next point to evaluate.
 Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
 The algorithm, therefore, works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
-The algorithm can be summarized as follows, where `f` is the function to evaluate, `loss` is the loss function, and `heap_push`, `head_pop` and `heap_max` are functions for manipulating a max-heap.
-
-```
-data $\gets$ empty_hashmap()
-intervals $\gets$ empty_max_heap()
-data[a] $\gets$ f(a)  # left bound
-data[b] $\gets$ f(b)  # right bound
-l $\gets$ loss(a, b, data[a], data[b])
-heap_push(intervals, (l, a, b))
-
-while heap_max(intervals)[0] > $\epsilon$:
-  _, a, b $\gets$ heap_pop(intervals)
-  m $\gets$ (a + b) / 2
-  data[m] $\gets$ f(m)
-  l_left $\gets$ loss(a, m, data[a], data[m])
-  l_right $\gets$ loss(m, b, data[m], data[b])
-  heap_push(intervals, (l_left, a, m))
-  heap_push(intervals, (l_right, m, b))
-```
-
-In the above, `loss` only gets the data associated with a single interval;
-in order to support loss functions that rely on data from neighboring intervals, we would need to maintain a separate data structure that encodes the neighborhood information.
-For example, if `data` were a binary tree storing `(x, f(x))` then we could query neighboring points in $\mathcal{O}(\log n)$ time, where $n$ is the number of subdomains.
-
 #### As an example, the interpoint distance is a good loss function in one dimension.
-An example of such a loss function for a one-dimensional function is the interpoint distance.
-This loss will suggest to sample a point in the middle of an interval (subdomain) with the largest distance and thereby ensure the continuity of the function.
-A more complex loss function that also takes the first neighboring intervals into account is one that adds more points where the second derivative (or curvature) is the highest.
+An example of such a local loss function for a one-dimensional function is the interpoint distance, i.e. given a subdomain (interval) $(x_\textrm{a}, x_\textrm{b})$ with values $(y_\textrm{a}, y_\textrm{right})$ the loss is $\sqrt{(x_\textrm{a} - x_\textrm{b})^2 + (y_\textrm{a} - y_\textrm{b})^2}$.
+A more complex loss function that also takes the first neighboring intervals into account is one that approximates the second derivative using a Taylor expansion.
 Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
+
+#### This algorithm has a logarithmic overhead when combined with an appropriate data structure
+The key data structure in the above algorithm is the priority queue of subdomains.
+It must support efficiently finding and removing the maximum priority element, as well as priority updates of arbitrary elements.
+An example of such a datastructure is a red--black tree or a skip list [@Cormen2009].
+Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all the required operations.
+In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
+Additionally the algorithm requires efficient queries for subdomains that contain a point $x$, and the neighbors of a given subdomain.
+For the one-dimensional case this could be achieved by using a red--black tree to keep the points $x$ in ascending order.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
-The parallel version of this algorithm proposes candidate points based on the existing data and the pending points.
-To accommodate that, we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
-Adding a pending point to the dataset splits the subdomain to which it belongs into several smaller subdomains and assigns a fraction of the original loss to these subdomains as an estimate.
+In order to include parallelism we need to allow for points that are "pending", i.e. whose value has been requested but is not yet known.
+To accommodate this, we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
+Adding a pending point to the dataset splits the subdomain to which it belongs into several smaller subdomains and assigns a fraction of the original loss to these subdomains.
 Providing the function value of a pending point then updates the loss estimate using the new data.
-Because the loss function is local, $\mathcal{O}(1)$ subdomains are involved in both operations, therefore resulting in a $\mathcal{O}(1)$ computational cost.
+
 
 #### We summarize the algorithm with pseudocode
-This is illustrated in the following algorithm, where `parallel_map` takes a function and array of inputs and evaluates the function on each input in parallel, and `n_per_round` is the number of parallel evaluations to do at a time.
+The parallel version of the algorithm can be summarized by the following pseudocode.
+In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and all subdomains containing a point $x$, `data` is a hashmap storing the points and their values, `executor` allows to offload evaluation of a function `f` to external computing resources, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
 
+```python
+for x in domain.boundary_points():
+  data[x] = f(x)
+
+# Start with a regular grid of points over the domain
+new_points, subdomains = domain.grid(executor.n_cores)
+for subdomain in subdomains:
+  queue.insert(domain, priority=inf)
+# Mark the points as pending and submit them to be evaluated
+for x in new_points:
+  data[x] = None
+  executor.submit(f, x)
+
+while True:
+  x, y = executor.get_one_result()
+  data[x] = y
+
+  # Update the losses of all the subdomains affected by
+  # the data at point 'x'
+  subdomains_to_update = set(domain.subdomains_containing(x))
+  if loss.n_neighbors > 0:
+    subdomains_to_update += set(
+      domain.neighbors(d, loss.n_neighbors)
+      for d in subdomains_to_update
+    )
+  for subdomain in subdomains_to_update:
+    queue.update(subdomain, priority=loss(domain, subdomain, data))
+
+  # Finish if the largest loss is less than the target
+  if queue.max_priority() < target_loss:
+    break
+
+  # Do not ask for more points if it would exceed our computing resources
+  if executor.n_outstanding_points > executor.n_cores:
+    continue
+
+  # Get the next points for evaluation
+  loss, subdomain = queue.pop()
+  subdomain_volume = domain.volume(subdomain)
+  new_points, new_subdomains = domain.split(subdomain)
+  # Send the new points for evaluation
+  for x in new_points:
+    data[x] = None
+    executor.submit(f, x)
+  # New subdomains are assigned a loss estimate based on the loss
+  # of the parent subdomain and the relative volume
+  for d in new_subdomains:
+    relative_volume = domain.volume(d) / subdomain_volume
+    queue.insert(subdomain, priority=loss * relative_volume)
+
+# Add any final outstanding points
+for x, y in executor.get_all_results():
+  data[x] = y
 ```
-def get_next(data, intervals):
-  l, a, b, need_update $\gets$ heap_pop(intervals)
-  while need_update:
-    f_a $\gets$ data[a]
-    f_b $\gets$ data[b]
-    if f_a is None or f_b is None:
-      break
-    l $\gets$ loss(a, b, f_a, f_b)
-    heap_push(intervals, (l, a, b, False))
-    l, a, b, need_update $\gets$ heap_pop(intervals)
-  return (l, a, b)
-
-
-data $\gets$ empty_hashmap()
-intervals $\gets$ empty_max_heap()
-data[a] $\gets$ f(a)
-data[b] $\gets$ f(b)
-l $\gets$ loss(a, b, data[a], data[b])
-heap_push(intervals, (l, a, b))
-
-while heap_max(intervals)[0] > $\epsilon$:
-  xs $\gets$ empty_array(n_per_round)
-  for i in 0..n_per_round-1:
-    l, a, b $\gets$ get_next(data, intervals)
-    m $\gets$ (a + b) / 2
-    xs[i] $\gets$ m
-    heap_push(intervals, (l/2, a, m, True))
-    heap_push(intervals, (l/2, m, b, True))
-
-  fs $\gets$ parallel_map(f, xs)
-
-  for i in 0..n_per_round:
-    data[xs[i]] $\gets$ fs[i]
-```
-
-#### The parallel algorithm has a logarithmic overhead when combined with an appropriate data structure
-The key data structure in the parallel algorithm is the priority queue of subdomains.
-It must support efficient removal and insertion, as well as finding the subdomain with the maximal loss.
-An example of such a datastructure is a red--black tree or a skip list [@Cormen2009].
-Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all three operations.
-In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
 
 # Loss function design
 
