@@ -86,6 +86,14 @@ def edit_raw_bibtex_entry(key, bib_entry):
         ("The European Physical Journal B", "Eur. Phys. J. B"),
         ("{SIAM} Journal on Numerical Analysis", "{SIAM} J. Numer. Anal."),
         ("{AIP} Conference Proceedings", "{AIP} Conf. Proc."),
+        ("{ACM} Transactions on Graphics", "{ACM} Trans. Graph."),
+        ("Measurement Science and Technology", "Meas. Sci. Technol"),
+        ("Numerische Mathematik", "Numer. Math."),
+        ("{IMA} Journal of Numerical Analysis", "{IMA} J. Appl. Math."),
+        ("{ACM} Transactions on Mathematical Software", "{ACM} Trans. Math. Softw."),
+        ("Journal of Computational and Applied Mathematics", "J. Comput. Appl. Math"),
+        ("{SciPost} Physics", "{SciPost} Phys."),
+        ("Computer Graphics Forum", "Comput. Graphics Forum"),
     ]
 
     for old, new in to_replace + journals:
