@@ -11,7 +11,7 @@ abstract: |
   These sweeps of parameters can potentially make the simulations prohibitively expensive.
   Therefore, when evaluating a function numerically, it is advantageous to sample it more densely in the interesting regions (called adaptive sampling) instead of evaluating it on a manually-defined homogeneous grid.
   Such adaptive algorithms exist within the machine learning field.
-  These methods can suggest a new point to calculate based on \textit{all} existing data at that time; however, this is an expensive operation.
+  These methods can suggest a new point to calculate based on *all* existing data at that time; however, this is an expensive operation.
   An alternative is to use local algorithms---in contrast to the previously mentioned global algorithms---which can suggest a new point, based only on the data in the immediate vicinity of a new point.
   This approach works well, even when using hundreds of computers simultaneously because the point suggestion algorithm is cheap (fast) to evaluate.
   We provide a reference implementation in Python and show its performance.
@@ -222,7 +222,9 @@ In the reference implementation, we use the SortedContainers Python package that
 # Loss function design
 
 #### Sampling in different problems pursues different goals
-<!-- Listing possible goals, such as integration, plotting (function appropriation), and maximization, isoline or isosurface finding.  -->
+Not all goals are achieved by using an identical sampling strategy.
+Here, the specific problem determines the goal.
+For example, quadrature rules based integration requires a denser sampling of the sections where the uncertainty of the interpolation is highest, plotting (or function approximation) requires continuity of the approximation, maximization only cares about finding an optimum, and isoline or isosurface sampling aims to sample regions near the iso level denser.
 
 #### Different loss functions tailor sampling performance to different goals
 The interpoint distance minimizing loss function we mentioned previously works on many functions; however, it is easy to write down a function where it will fail.
