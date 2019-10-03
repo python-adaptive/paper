@@ -139,7 +139,7 @@ Due to the local nature of this algorithm and the sparsity of space in higher di
 The algorithm, therefore, works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
-An example of such a local loss function for a one-dimensional function is the interpoint distance, i.e. given a subdomain (interval) $(x_\textrm{a}, x_\textrm{b})$ with values $(y_\textrm{a}, y_\textrm{right})$ the loss is $\sqrt{(x_\textrm{a} - x_\textrm{b})^2 + (y_\textrm{a} - y_\textrm{b})^2}$.
+An example of such a local loss function for a one-dimensional function is the interpoint distance, i.e. given a subdomain (interval) $(x_\textrm{a}, x_\textrm{b})$ with values $(y_\textrm{a}, y_\textrm{b})$ the loss is $\sqrt{(x_\textrm{a} - x_\textrm{b})^2 + (y_\textrm{a} - y_\textrm{b})^2}$.
 A more complex loss function that also takes the first neighboring intervals into account is one that approximates the second derivative using a Taylor expansion.
 Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
 
@@ -149,7 +149,7 @@ It must support efficiently finding and removing the maximum priority element, a
 An example of such a datastructure is a red--black tree or a skip list [@Cormen2009].
 Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all the required operations.
 In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
-Additionally the algorithm requires efficient queries for subdomains that contain a point $x$, and the neighbors of a given subdomain.
+Additionally, the algorithm requires efficient queries for subdomains that contain a point $x$, and the neighbors of a given subdomain.
 For the one-dimensional case this could be achieved by using a red--black tree to keep the points $x$ in ascending order.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
@@ -257,8 +257,8 @@ L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
 where $\epsilon$ is the smallest resolution we want to sample.
 
 #### Asymptotically dense sampling is achieved by adding subdomain volume to the loss
-In two-dimensions (2D), subdomains are defined by triangles, where its vertices are known data points.
-Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of one of the edges, instead of the center of the triangle, if the triangulation becomes better as a result.
+In two-dimensions (2D), subdomains are triangles, where its vertices are the known data points.
+Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of the triangle or in the middle of the longest edge, if the triangulation becomes better as a result.
 A distance loss equivalent in 2D is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
 Using this loss function, some narrow features in otherwise flat regions might not be discovered initially.
 It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
