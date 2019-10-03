@@ -31,7 +31,8 @@ RUN chmod +x /usr/bin/tini
 RUN mkdir /environments
 COPY environment.yml /environments/
 
-RUN conda-env create -f /environments/environment.yml
+RUN conda-env create -f /environments/environment.yml && \
+    echo "conda activate revtex-markdown-paper" >> ~/.bashrc
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
