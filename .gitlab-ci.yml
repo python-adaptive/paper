@@ -41,7 +41,7 @@ build-env:ubuntu: &build-docker
 make:
   stage: test
   script:
-    - make
+    - source activate revtex-markdown-paper && make
   artifacts:
     paths:
       - paper.pdf

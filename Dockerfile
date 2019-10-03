@@ -32,7 +32,7 @@ COPY environment.yml /environments/
 
 RUN conda-env create -f /environments/environment.yml && \
     # ensure that we activate the environment in any shell (Gitlab CI uses 'sh')
-    echo "source activate revtex-markdown-paper" >> ~/.bashrc
+    echo "conda activate revtex-markdown-paper" >> ~/.bashrc
 
 ENTRYPOINT [ "/usr/bin/tini", "--" ]
 CMD [ "/bin/bash" ]
