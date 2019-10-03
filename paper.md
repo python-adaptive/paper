@@ -215,7 +215,7 @@ while heap_max(intervals)[0] > $\epsilon$:
 #### The parallel algorithm has a logarithmic overhead when combined with an appropriate data structure
 The key data structure in the parallel algorithm is the priority queue of subdomains.
 It must support efficient removal and insertion, as well as finding the subdomain with the maximal loss.
-An example of such a datastructure is a red--black tree <!-- reference here --> or a skip list <!-- reference here -->.
+An example of such a datastructure is a red--black tree or a skip list [@Cormen2009].
 Both of these have an average complexity of $\mathcal{O}(\log{n})$ for all three operations.
 In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
 
