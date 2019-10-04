@@ -167,6 +167,7 @@ while queue.max_priority() < target_loss:
       (domain.neighbors(d, loss.n_neighbors) for d in new_subdomains),
       set(),
     )
+    subdomains_to_update -= set(new_subdomains)
     for subdomain in subdomains_to_update:
       queue.update(subdomain, priority=loss(domain, subdomain, data))
 ```
