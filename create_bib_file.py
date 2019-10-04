@@ -133,7 +133,7 @@ entries = [edit_raw_bibtex_entry(key, bib) for key, bib in zip(dois.keys(), bibs
 
 with open("paper.bib", "w") as out_file:
     fname_other = "not_on_crossref.bib"
-    out_file.write("Created automatically with `python create_bib_file.py`.\n\n")
+    out_file.write("% Created automatically with `python create_bib_file.py`.\n\n")
     out_file.write("@preamble{ {\\providecommand{\\BIBYu}{Yu} } }\n\n")
     out_file.write(f"\n% Below is from `{fname_other}`.\n\n")
     with open(fname_other) as in_file:
