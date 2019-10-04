@@ -188,68 +188,70 @@ For the one-dimensional case this could be achieved by using a red--black tree t
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
 In order to include parallelism we need to allow for points that are "pending", i.e. whose value has been requested but is not yet known.
-To accommodate this, we replace the loss of subdomains that include pending points with an estimate based only on the evaluated data.
-Adding a pending point to the dataset splits the subdomain to which it belongs into several smaller subdomains and assigns a fraction of the original loss to these subdomains.
-Providing the function value of a pending point then updates the loss estimate using the new data.
-
+In the sequential algorithm subdomains only contain points on their boundaries.
+In the parallel algorithm *pending* points are placed in the interior of subdomains, and the loss of the subdomain is reduced to take these pending points into account.
+Later, when a pending point $x$ is finally evaluated, we *split* the subdomain that contains $x$ such that it is on the boundary of new, smaller, subdomains.
+We then calculate the loss of these new subdomains, and insert them into the priority queue, and update the losses of neighboring subdomains if required.
 
 #### We summarize the algorithm with pseudocode
 The parallel version of the algorithm can be summarized by the following pseudocode.
-In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and all subdomains containing a point $x$, `data` is a hashmap storing the points and their values, `executor` allows to offload evaluation of a function `f` to external computing resources, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
+In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and create new subdomains by adding a point $x$, `data` is a hashmap storing the points and their values, `executor` allows to offload evaluation of a function `f` to external computing resources, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
 
 ```python
-for x in domain.boundary_points():
+def scaled_loss(domain, subdomain, data):
+    volumes = [subdomain.volume(d) for d in subdomain.subdomains()]
+    max_relative_subvolume = max(volumes) / sum(volumes)
+    L_0 = loss(domain, subdomain, data)
+    return max_relative_subvolume * L_0
+
+first_subdomain, = domain.subdomains()
+for x in domain.points(first_subdomain):
   data[x] = f(x)
 
-# Start with a regular grid of points over the domain
-new_points, subdomains = domain.grid(executor.n_cores)
-for subdomain in subdomains:
-  queue.insert(domain, priority=inf)
-# Mark the points as pending and submit them to be evaluated
+new_points = first_subdomain.insert_points(executor.ncores)
 for x in new_points:
   data[x] = None
   executor.submit(f, x)
 
-while True:
+queue.insert(first_subdomain, priority=scaled_loss(domain, subdomain, data))
+
+while executor.n_outstanding_points > 0:
   x, y = executor.get_one_result()
   data[x] = y
 
-  # Update the losses of all the subdomains affected by
-  # the data at point 'x'
-  subdomains_to_update = set(domain.subdomains_containing(x))
+  # Split into smaller subdomains with `x` at a subdomain boundary
+  # And calculate the losses for these new subdomains
+  old_subdomains, new_subdomains = domain.split_at(x)
+  for subdomain in old_subdomains:
+    queue.remove(old_subdomain)
+  for subdomain in new_subdomains:
+    queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
+
   if loss.n_neighbors > 0:
-    subdomains_to_update.update(set(
-      domain.neighbors(d, loss.n_neighbors)
-      for d in subdomains_to_update
-    ))
-  for subdomain in subdomains_to_update:
-    queue.update(subdomain, priority=loss(domain, subdomain, data))
+    subdomains_to_update = reduce(
+      set.union,
+      (domain.neighbors(d, loss.n_neighbors) for d in new_subdomains),
+      set(),
+    )
+    subdomains_to_update -= set(new_subdomains)
+    for subdomain in subdomains_to_update:
+      queue.update(subdomain, priority=scaled_loss(domain, subdomain, data))
 
-  # Finish if the largest loss is less than the target
+  # If it looks like we're done, don't send more work
   if queue.max_priority() < target_loss:
-    break
-
-  # Do not ask for more points if it would exceed our computing resources
-  if executor.n_outstanding_points > executor.n_cores:
     continue
 
-  # Get the next points for evaluation
-  loss, subdomain = queue.pop()
-  subdomain_volume = domain.volume(subdomain)
-  new_points, new_subdomains = domain.split(subdomain)
-  # Send the new points for evaluation
-  for x in new_points:
-    data[x] = None
-    executor.submit(f, x)
-  # New subdomains are assigned a loss estimate based on the loss
-  # of the parent subdomain and the relative volume
-  for d in new_subdomains:
-    relative_volume = domain.volume(d) / subdomain_volume
-    queue.insert(subdomain, priority=loss * relative_volume)
-
-# Add any final outstanding points
-for x, y in executor.get_all_results():
-  data[x] = y
+  # Send as many points for evaluation as we have compute cores
+  for _ in range(executor.ncores - executor.n_outstanding_points)
+    loss, subdomain = queue.pop()
+    new_point, = subdomain.insert_points(1)
+    data[new_point] = None
+    executor.submit(f, new_point)
+    # Send the new points for evaluation
+    for x in new_points:
+      data[x] = None
+      executor.submit(f, x)
+    queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
 ```
 
 # Loss function design
