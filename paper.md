@@ -181,7 +181,7 @@ The key data structure in the above algorithm is the priority queue of subdomain
 It must support efficiently finding and removing the maximum priority element, as well as updating the priority of arbitrary elements whose priority is unknown (when updating the loss of neighboring subdomains).
 Such a datastructure can be achieved with a combination of a hashmap (mapping elements to their priority) and a red--black tree or a skip list [@Cormen2009] that stores `(priority, element)`.
 This has average complexity of $\mathcal{O}(\log{n})$ for all the required operations.
-In the reference implementation, we use the SortedContainers Python package that provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
+In the reference implementation, we use the SortedContainers Python package [@Jenks2014], which provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
 Additionally, the algorithm requires efficient queries for subdomains that contain a point $x$, and the neighbors of a given subdomain.
 For the one-dimensional case this could be achieved by using a red--black tree to keep the points $x$ in ascending order.
 
