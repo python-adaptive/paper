@@ -144,7 +144,6 @@ The algorithm descried above can be summarized by the following pseudocode.
 In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and all subdomains containing a point $x$, `data` is a hashmap storing the points and their values, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
 
 ```python
-# Calculate the boundary points first
 first_subdomain, = domain.subdomains()
 for x in domain.points(first_subdomain):
   data[x] = f(x)
