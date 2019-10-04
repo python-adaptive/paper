@@ -138,6 +138,39 @@ After these insertions and updates we are ready to suggest the next point to eva
 Due to the local nature of this algorithm and the sparsity of space in higher dimensions, we will suffer from the curse of dimensionality.
 The algorithm, therefore, works best in low dimensional space; typically calculations that can reasonably be plotted, so with 1, 2, or 3 degrees of freedom.
 
+#### We summarize the algorithm with pseudocode
+
+The algorithm descried above can be summarized by the following pseudocode.
+In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and all subdomains containing a point $x$, `data` is a hashmap storing the points and their values, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
+
+```python
+# Calculate the boundary points first
+first_subdomain, = domain.subdomains()
+for x in domain.points(first_subdomain):
+  data[x] = f(x)
+
+queue.insert(first_subdomain, priority=loss(domain, first_subdomain, data))
+
+while queue.max_priority() < target_loss:
+  loss, subdomain = queue.pop()
+
+  new_points, new_subdomains = domain.split(subdomain)
+  for x in new_points:
+    data[x] = f(x)
+
+  for subdomain in new_subdomains:
+    queue.insert(subdomain, priority=loss(domain, subdomain, data))
+
+  if loss.n_neighbors > 0:
+    subdomains_to_update = reduce(
+      set.union,
+      (domain.neighbors(d, loss.n_neighbors) for d in new_subdomains),
+      set(),
+    )
+    for subdomain in subdomains_to_update:
+      queue.update(subdomain, priority=loss(domain, subdomain, data))
+```
+
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a local loss function for a one-dimensional function is the interpoint distance, i.e. given a subdomain (interval) $(x_\textrm{a}, x_\textrm{b})$ with values $(y_\textrm{a}, y_\textrm{b})$ the loss is $\sqrt{(x_\textrm{a} - x_\textrm{b})^2 + (y_\textrm{a} - y_\textrm{b})^2}$.
 A more complex loss function that also takes the first neighboring intervals into account is one that approximates the second derivative using a Taylor expansion.
