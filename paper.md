@@ -161,11 +161,9 @@ while queue.max_priority() < target_loss:
     queue.insert(subdomain, priority=loss(domain, subdomain, data))
 
   if loss.n_neighbors > 0:
-    subdomains_to_update = reduce(
-      set.union,
-      (domain.neighbors(d, loss.n_neighbors) for d in new_subdomains),
-      set(),
-    )
+    subdomains_to_update = set()
+    for d in new_subdomains:
+        subdomains_to_update.update(domain.neighbors(d, loss.n_neighbors))
     subdomains_to_update -= set(new_subdomains)
     for subdomain in subdomains_to_update:
       queue.update(subdomain, priority=loss(domain, subdomain, data))
@@ -199,8 +197,8 @@ In the following `queue` is the priority queue of subdomains, `domain` is an obj
 
 ```python
 def scaled_loss(domain, subdomain, data):
-    volumes = [subdomain.volume(d) for d in subdomain.subdomains()]
-    max_relative_subvolume = max(volumes) / sum(volumes)
+    subvolumes = domain.subvolumes(subdomain)
+    max_relative_subvolume = max(subvolumes) / sum(subvolumes)
     L_0 = loss(domain, subdomain, data)
     return max_relative_subvolume * L_0
 
@@ -208,7 +206,7 @@ first_subdomain, = domain.subdomains()
 for x in domain.points(first_subdomain):
   data[x] = f(x)
 
-new_points = first_subdomain.insert_points(executor.ncores)
+new_points = domain.insert_points(first_subdomain, executor.ncores)
 for x in new_points:
   data[x] = None
   executor.submit(f, x)
@@ -228,11 +226,9 @@ while executor.n_outstanding_points > 0:
     queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
 
   if loss.n_neighbors > 0:
-    subdomains_to_update = reduce(
-      set.union,
-      (domain.neighbors(d, loss.n_neighbors) for d in new_subdomains),
-      set(),
-    )
+    subdomains_to_update = set()
+    for d in new_subdomains:
+        subdomains_to_update.update(domain.neighbors(d, loss.n_neighbors))
     subdomains_to_update -= set(new_subdomains)
     for subdomain in subdomains_to_update:
       queue.update(subdomain, priority=scaled_loss(domain, subdomain, data))
@@ -244,13 +240,9 @@ while executor.n_outstanding_points > 0:
   # Send as many points for evaluation as we have compute cores
   for _ in range(executor.ncores - executor.n_outstanding_points)
     loss, subdomain = queue.pop()
-    new_point, = subdomain.insert_points(1)
+    new_point, = domain.insert_points(subdomain, 1)
     data[new_point] = None
     executor.submit(f, new_point)
-    # Send the new points for evaluation
-    for x in new_points:
-      data[x] = None
-      executor.submit(f, x)
     queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
 ```
 
