@@ -188,16 +188,16 @@ For the one-dimensional case this could be achieved by using a red--black tree t
 So far, the description of the general algorithm did not include parallelism.
 In order to include parallelism we need to allow for points that are "pending", i.e. whose value has been requested but is not yet known.
 In the sequential algorithm subdomains only contain points on their boundaries.
-In the parallel algorithm *pending* points are placed in the interior of subdomains, and the loss of the subdomain is reduced to take these pending points into account.
+In the parallel algorithm *pending* points are placed in the interior of subdomains, and the priority of the subdomains in the queue is reduced to take these pending points into account.
 Later, when a pending point $x$ is finally evaluated, we *split* the subdomain that contains $x$ such that it is on the boundary of new, smaller, subdomains.
-We then calculate the loss of these new subdomains, and insert them into the priority queue, and update the losses of neighboring subdomains if required.
+We then calculate the priority of these new subdomains, and insert them into the priority queue, and update the priority of neighboring subdomains if required.
 
 #### We summarize the algorithm with pseudocode
 The parallel version of the algorithm can be summarized by the following pseudocode.
 In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and create new subdomains by adding a point $x$, `data` is a hashmap storing the points and their values, `executor` allows to offload evaluation of a function `f` to external computing resources, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
 
 ```python
-def scaled_loss(domain, subdomain, data):
+def priority(domain, subdomain, data):
     subvolumes = domain.subvolumes(subdomain)
     max_relative_subvolume = max(subvolumes) / sum(subvolumes)
     L_0 = loss(domain, subdomain, data)
@@ -212,7 +212,7 @@ for x in new_points:
   data[x] = None
   executor.submit(f, x)
 
-queue.insert(first_subdomain, priority=scaled_loss(domain, subdomain, data))
+queue.insert(first_subdomain, priority=priority(domain, subdomain, data))
 
 while executor.n_outstanding_points > 0:
   x, y = executor.get_one_result()
@@ -224,7 +224,7 @@ while executor.n_outstanding_points > 0:
   for subdomain in old_subdomains:
     queue.remove(old_subdomain)
   for subdomain in new_subdomains:
-    queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
+    queue.insert(subdomain, priority(domain, subdomain, data))
 
   if loss.n_neighbors > 0:
     subdomains_to_update = set()
@@ -233,7 +233,7 @@ while executor.n_outstanding_points > 0:
       subdomains_to_update.update(neighbors)
     subdomains_to_update -= set(new_subdomains)
     for subdomain in subdomains_to_update:
-      queue.update(subdomain, priority=scaled_loss(domain, subdomain, data))
+      queue.update(subdomain, priority(domain, subdomain, data))
 
   # If it looks like we're done, don't send more work
   if queue.max_priority() < target_loss:
@@ -245,7 +245,7 @@ while executor.n_outstanding_points > 0:
     new_point, = domain.insert_points(subdomain, 1)
     data[new_point] = None
     executor.submit(f, new_point)
-    queue.insert(subdomain, priority=scaled_loss(domain, subdomain, data))
+    queue.insert(subdomain, priority(domain, subdomain, data))
 ```
 
 # Loss function design
