@@ -1,5 +1,5 @@
 ---
-title:  'Adaptive, tools for adaptive parallel sampling of mathematical functions'
+title:  '*Adaptive*: an adaptive parallel sampling algorithm for mathematical functions based on local local criteria'
 journal: 'PeerJ'
 author:
 - name: Tinkerer
