@@ -100,6 +100,16 @@ def memoize(obj):
     return memoizer
 
 
+def parse_params(params):
+    for k, v in params.items():
+        if isinstance(v, str):
+            try:
+                params[k] = eval(v)
+            except NameError:
+                pass
+    return params
+
+
 @memoize
 def discretized_hamiltonian(a, which_lead=None):
     ham = (
