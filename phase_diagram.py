@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import inspect
 import operator
 import sys
@@ -9,6 +10,8 @@ from types import SimpleNamespace
 import kwant
 import numpy as np
 import scipy.constants
+import scipy.sparse
+import scipy.sparse.linalg as sla
 from kwant.continuum.discretizer import discretize
 
 import pfaffian as pf
@@ -111,15 +114,15 @@ def parse_params(params):
 
 
 @memoize
-def discretized_hamiltonian(a, which_lead=None):
+def discretized_hamiltonian(a, which_lead=None, subst_sm=None):
     ham = (
         "(0.5 * hbar**2 * (k_x**2 + k_y**2 + k_z**2) / m_eff * c - mu + V) * kron(sigma_0, sigma_z) + "
         "alpha * (k_y * kron(sigma_x, sigma_z) - k_x * kron(sigma_y, sigma_z)) + "
         "0.5 * g * mu_B * (B_x * kron(sigma_x, sigma_0) + B_y * kron(sigma_y, sigma_0) + B_z * kron(sigma_z, sigma_0)) + "
         "Delta * kron(sigma_0, sigma_x)"
     )
-
-    subst_sm = {"Delta": 0}
+    if subst_sm is None:
+        subst_sm = {"Delta": 0}
 
     if which_lead is not None:
         subst_sm["V"] = f"V_{which_lead}(z, V_0, V_r, V_l, x0, sigma, r1)"
@@ -274,7 +277,7 @@ def change_hopping_at_interface(syst, template, shape1, shape2):
 
 
 @memoize
-def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead):
+def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead, sc_inside_wire=False, wraparound=False):
     """Create an infinite cylindrical 3D wire partially covered with a
     superconducting (SC) shell.
 
@@ -297,6 +300,10 @@ def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead):
         Name of the potential function of the lead, e.g. `which_lead = 'left'` will
         require a function `V_left(z, V_0)` and
         `mu_left(mu_func(x, x0, sigma, mu_lead, mu_wire)`.
+    sc_inside_wire : bool
+        Put superconductivity inside the wire.
+    wraparound : bool
+        Apply wraparound to the lead.
 
     Returns
     -------
@@ -326,7 +333,7 @@ def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead):
     )
 
     templ_sm, templ_sc, templ_interface = discretized_hamiltonian(
-        a, which_lead=which_lead
+        a, which_lead=which_lead, subst_sm={} if sc_inside_wire else None
     )
     templ_sm = apply_peierls_to_template(templ_sm)
     lead.fill(templ_sm, *shape_normal_lead)
@@ -339,7 +346,6 @@ def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead):
 
         xyz_offset = get_offset(*shape_sc, lat)
 
-        templ_sc = apply_peierls_to_template(templ_sc, xyz_offset=xyz_offset)
         templ_interface = apply_peierls_to_template(templ_interface)
         lead.fill(templ_sc, *shape_sc_lead)
 
@@ -348,6 +354,8 @@ def make_lead(a, r1, r2, coverage_angle, angle, with_shell, which_lead):
             lead, templ_interface, shape_normal_lead, shape_sc_lead
         )
 
+    if wraparound:
+        lead = kwant.wraparound.wraparound(lead)
     return lead
 
 
@@ -474,3 +482,45 @@ def gap_from_modes(lead, params, tol=1e-6):
                 lim[0] = energy
         gap = sum(lim) / 2
     return gap
+
+
+def phase_bounds_operator(lead, params, k_x=0, mu_param='mu'):
+    params = dict(params, k_x=k_x)
+    params[mu_param] = 0
+    h_k = lead.hamiltonian_submatrix(params=params, sparse=True)
+    sigma_z = scipy.sparse.csc_matrix(np.array([[1, 0], [0, -1]]))
+    _operator = scipy.sparse.kron(scipy.sparse.eye(h_k.shape[0] // 2), sigma_z) @ h_k
+    return _operator
+
+
+def find_phase_bounds(lead, params, k_x=0, num_bands=20, sigma=0, mu_param='mu'):
+    """Find the phase boundaries.
+    Solve an eigenproblem that finds values of chemical potential at which the
+    gap closes at momentum k=0. We are looking for all real solutions of the
+    form H*psi=0 so we solve sigma_0 * tau_z H * psi = mu * psi.
+
+    Parameters
+    -----------
+    lead : kwant.builder.InfiniteSystem object
+        The finalized infinite system.
+    params : dict
+        A dictionary that is used to store Hamiltonian parameters.
+    k_x : float
+        Momentum value, by default set to 0.
+
+    Returns
+    --------
+    chemical_potential : numpy array
+        Twenty values of chemical potential at which a bandgap closes at k=0.
+    """
+    chemical_potentials = phase_bounds_operator(lead, params, k_x, mu_param)
+
+    if num_bands is None:
+        mus = np.linalg.eigvals(chemical_potentials.todense())
+    else:
+        mus = sla.eigs(chemical_potentials, k=num_bands, sigma=sigma, which="LM")[0]
+
+    real_solutions = abs(np.angle(mus)) < 1e-10
+
+    mus[~real_solutions] = np.nan  # To ensure it returns the same shape vector
+    return np.sort(mus.real)
