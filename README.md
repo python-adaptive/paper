@@ -18,3 +18,14 @@ Then run `make` inside a docker container using the image you just built:
 ```
 docker run -it --rm -v $(pwd):/work -w /work adaptive-paper make
 ```
+
+### Update the bibliography
+
+```bash
+yaml2bib \
+  --bib_fname "paper.bib" \
+  --dois_yaml "paper.yaml" \
+  --replacements_yaml "replacements.yaml" \
+  --static_bib "not_on_crossref.bib" \
+  --email "bas@nijho.lt"
+```
