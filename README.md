@@ -19,7 +19,7 @@ Then run `make` inside a docker container using the image you just built:
 docker run -it --rm -v $(pwd):/work -w /work adaptive-paper make
 ```
 
-### Update the bibliography
+### Update the bibliography (using [`yaml2bib`](https://github.com/basnijholt/yaml2bib))
 
 ```bash
 yaml2bib \
