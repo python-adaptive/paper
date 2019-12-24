@@ -284,49 +284,23 @@ Where we have used identical definitions to the serial case for `f`, `data`, `lo
 
 #### Sampling in different problems pursues different goals
 Not all goals are achieved by using an identical sampling strategy; the specific problem determines the goal.
-For example, quadrature rules based integration requires a denser sampling of the sections where the uncertainty of the interpolation is highest, plotting (or function approximation) requires continuity of the approximation, maximization only cares about finding an optimum, and isoline or isosurface sampling aims to sample regions near the iso level denser.
+For example, quadrature rules requires a denser sampling of the subdomains where the interpolation error is highest, plotting (or function approximation) requires continuity of the approximation, maximization only cares about finding an optimum, and isoline or isosurface sampling aims to sample regions near a given function value more densely.
+These different sampling goals each require a loss function tailored to the specific case.
 
-#### Different loss functions tailor sampling performance to different goals
-To plot a function, the interpoint distance minimizing loss function we mentioned previously, works on many functions; however, it is easy to write down a function where it will fail.
-For example, $1/x^2$ has a singularity at $x=0$ and will be sampled too densely around that singularity using a distance minimizing loss.
-We can avoid this by defining additional logic inside the loss function.
-
-#### Adding loss functions allows for balancing between multiple priorities.
-Different loss functions prioritize sampling different features.
-Adding loss functions allows for balancing between the multiple desired priorities.
-For example, combining a loss function that calculates the curvature with a distance loss function, will sample regions with high curvature more densely, while ensuring continuity.
+#### Different loss functions tailor sampling performance for different classes of functions
+Additionally, it is important to take into account the class of functions being learned when selecting a loss function, even if the specific goal (e.g. continuity of the approximation) remains unchanged.
+For example, if we wanted a smooth approximation to a function with a singularity, then the interpoint distance loss function would be a poor choice, even if it is generally a good choice for that specified goal.
+This is because the aforementioned loss function will "lock on" to the singularity, and will fail to sample the function elsewhere once it starts.
+This is an illustration of the following principle: for optimal sampling performance, loss functions should be tailored to the particular domain of interest.
 
 #### Loss function regularization avoids singularities
-To avoid indefinitely sampling the function based on a distance loss alone, we can regularize the loss.
-A simple (but not optimal) strategy is to limit the size of each interval in the $x$ direction using,
+One strategy for designing loss functions is to take existing loss functions and apply a regularization. For example, to limit the over-sampling of singularities inherent in the distance loss we can set the loss of subdomains that are smaller than a given threshold to zero, which will prevent them from being sampled further.
 
-\begin{equation*}
-L_{i, i+1}^\textrm{dist}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}},
-\end{equation*}
-
-\begin{equation*}
-L_{i,i+1}^\textrm{reg}=\begin{cases}
-\begin{array}{c}
-0\\
-L_{i, i+1}^\textrm{dist}(x_i, x_{i+1}, y_i, y_{i+1})
-\end{array} & \begin{array}{c}
-\textrm{if} \; x_{i+1}-x_{i}<\epsilon,\\
-\textrm{else,}
-\end{array}\end{cases}
-\end{equation*}
-
-where $\epsilon$ is the smallest resolution we want to sample.
-
-#### Asymptotically dense sampling is achieved by adding subdomain volume to the loss
-In two-dimensions (2D), subdomains are triangles, where its vertices are the known data points.
-Losses are therefore calculated for each triangle but, unlike the 1D case, candidate points can be chosen at the center of the triangle or in the middle of the longest edge, if the triangulation becomes better as a result.
-A distance loss equivalent in 2D is the area spanned by the three-dimensional (3D) vectors of the vertices of the triangle.
-Using this loss function, some narrow features in otherwise flat regions might not be discovered initially.
-It is therefore beneficial if a loss function has a property that eventually, all points should be sampled.
-A loss functions that ensure this is a homogeneous loss function that returns the 2D area span by the $x, y$ coordinates.
-However, this loss function does not use the function-values and is, therefore, by itself is not an efficient solution.
-Ideally, interesting regions are sampled more densely, while simultaneously new potentially interesting regions are also discovered.
-By adding the two loss functions, we can combine the 3D area loss to exploit interesting regions, while the 2D area loss explores less densely sampled regions that might contain interesting features.
+#### Adding loss functions allows for balancing between multiple priorities.
+Another general strategy for designing loss functions is to combine existing loss functions that optimize for particular features, and then combine them together. Typically one weights the different constituent losses so as to prioritize the different features.
+For example, combining a loss function that calculates the curvature with a distance loss function will sample regions with high curvature more densely, while ensuring continuity.
+Another important example is combining a loss function with the volume of the subdomain, which will ensure that the sampling is asymptotically dense everywhere (because large subdomains will have a correspondingly large loss).
+This is important if there are many distinct and narrow features that all need to be found, and densely sampled in the region around the feature.
 
 # Examples
 
