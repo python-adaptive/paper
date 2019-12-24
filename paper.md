@@ -212,8 +212,7 @@ Later, when a pending point $x$ is finally evaluated, we *split* the subdomain t
 We then calculate the priority of these new subdomains, and insert them into the priority queue, and update the priority of neighboring subdomains if required.
 
 #### We summarize the algorithm with pseudocode
-The parallel version of the algorithm can be summarized by the following pseudocode.
-In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and create new subdomains by adding a point $x$, `data` is a hashmap storing the points and their values, `executor` allows to offload evaluation of a function `f` to external computing resources, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
+The parallel version of the algorithm can be described by the following Python code:
 
 ```python
 def priority(domain, subdomain, data):
@@ -266,6 +265,20 @@ while executor.n_outstanding_points > 0:
     executor.submit(f, new_point)
     queue.insert(subdomain, priority(domain, subdomain, data))
 ```
+
+Where we have used identical definitions to the serial case for `f`, `data`, `loss` and the following additional definitions:
+
+`queue`
+
+: As for the sequential case, but must additionally support: `remove(element)`, remove the provided element from the queue.
+
+`domain`
+
+: As for the sequential case, but must additionally support: `insert_points(subdomain, n)`, insert `n` (pending) points into the given subdomain without splitting the subdomain; `subvolumes(subdomain)`, return the volumes of all the sub-subdomains contained within the given subdomain; `split_at(x)`, split the domain at a new (evaluated) point `x`, returning the old subdomains that were removed, and the new subdomains that were added as a result.
+
+`executor`
+
+: An object that can submit function evaluations to computing resources and retrieve results. Supports the following methods: `submit(f, x)`, schedule the execution of `f(x)` and do not block ; `get_one_result()`, block waiting for a single result, returning the pair `(x, y)` as soon as it becomes available; `ncores`, the total number of parallel processing units; `n_outstanding_points`, the number of function evaluations that have been requested and not yet retrieved, incremented by `submit` and decremented by `get_one_result`.
 
 # Loss function design
 
