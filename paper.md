@@ -103,7 +103,7 @@ Another application for adaptive sampling is numerical integration.
 It works by estimating the integration error of each interval and then minimizing the sum of these errors greedily.
 For example, the `CQUAD` algorithm [@Gonnet2010] in the GNU Scientific Library [@Galassi1996] implements a more sophisticated strategy and is a doubly-adaptive general-purpose integration routine which can handle most types of singularities.
 In general, it requires more function evaluations than the integration routines in `QUADPACK` [@Galassi1996]; however, it works more often for difficult integrands.
-It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by adding more points---that do not lie on a regular grid---to each interval.
+It is doubly-adaptive because it can decide to either subdivide intervals into more intervals or refine an interval by using a polynomial approximation of higher degree, requiring more points.
 
 #### PDE solvers and computer graphics use adaptive meshing.
 Hydrodynamics [@Berger1989; @Berger1984] and astrophysics [@Klein1999] use an adaptive refinement of the triangulation mesh on which a partial differential equation is discretized.
