@@ -32,9 +32,9 @@ Even though it is suboptimal, one usually resorts to sampling $X$ on a homogeneo
 <!-- This should convey the point that it is advantageous to do this. -->
 An alternative, which improves the simulation efficiency, is to choose new potentially interesting points in $X$, based on existing data [@Gramacy2004; @Figueiredo1995; @Castro2008; @Chen2017].
 Bayesian optimization works well for high-cost simulations where one needs to find a minimum (or maximum) [@Takhtaganov2018].
-However, if the goal of the simulation is to approximate a continuous function using the fewest points, the continuity of the approximation is achieved by a greedy algorithm that samples mid-points of intervals with the largest distance or curvature [@Wolfram2011].
+However, if the goal of the simulation is to approximate a continuous function using the fewest points, an alternative strategy is to use a greedy algorithm that samples mid-points of intervals with the largest length or curvature [@Wolfram2011].
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
-Here, the complexity arises when parallelizing this algorithm because this requires a lot of bookkeeping and planning.
+Another advantage of such an algorithm is that it may be parallelized cheaply (i.e. more than one point may be sampled at a time), as we do not need to perform a global computation over all the data (as we would with Bayesian sampling) when determining which points to sample next.
 
 ![Visualization of a 1-D point choosing algorithm for a black-box function (grey).
 We start by calculating the two boundary points.
