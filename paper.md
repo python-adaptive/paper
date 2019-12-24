@@ -45,20 +45,17 @@ The loss function in this example is an approximation to the curvature, calculat
 ](figures/algo.pdf){#fig:algo}
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
-To handle many parallel workers that calculate the function values and request new points, the algorithm needs to have a low computational overhead.
-Requiring that, when a new point has been calculated, that the information updates are local (only in a region around the newly calculated point), will reduce the time complexity of the algorithm.
-A simple example is greedily optimizing continuity of the sampling by selecting points according to the distance to the largest gaps in the function values, as in Fig. @fig:algo.
-For a one-dimensional function with three points known (its boundary points and a point in the center), such a simple algorithm consists of the following steps:
-(1) keep all points $x$ sorted, where two consecutive points define an interval,
-(2) calculate the distance for each interval $L_{i, i+1}=\sqrt{(x_{i+1}-x_{i})^{2}+(y_{i+1}-y_{i})^{2}}$,
-(3) pick a new point $x_\textrm{new}$ in the middle of the interval with the largest $L$, creating two new intervals around that point,
-(4) calculate $f(x_\textrm{new})$,
-(5) repeat the previous steps, without redoing calculations for unchanged intervals.
 
-In this paper, we present a class of algorithms that rely on local criteria for sampling, such as in the above example.
-Here we associate a *local loss* to each interval and pick a *candidate point* inside the interval with the largest loss.
-For example, in the case of the integration algorithm, the loss is the error estimate.
-The advantage of these *local* algorithms is that they allow for easy parallelization and have a low computational overhead.
+The algorithm visualized in @fig:algo consists of the following steps:
+(1) evaluate the function at the boundaries $a$ and $b$, of the interval of interest,
+(2) calculate the loss for the interval $L_{a, b} = \sqrt{(b - a)^2 + (f(b) - f(a))^2}$,
+(3) pick a new point $x_\textrm{new}$ in the centre of the interval with the largest loss, $(x_i, x_j)$,
+(4) calculate $f(x_\textrm{new})$,
+(5) discard the interval $(x_i, x_j)$ and create two new intervals $(x_i, x_\textrm{new})$ and $(x_\textrm{new}, x_j)$, calculating their losses $L_{x_i, x_\textrm{new}}$ and $L_{x_\textrm{new}, x_j}$
+(6) repeat from step 3.
+
+In this paper we present a class of algorithms that generalizes the above example. This general class of algorithms is based on using a *priority queue* of subdomains (intervals in 1-D), ordered by a *loss* obtained from a *local loss function* (which depends only on the data local to the subdomain), and greedily selecting points from subdomains at the top of the priority queue.
+The advantage of these *local* algorithms is that they have a lower computational overhead than algorithms requiring *global* data and updates (e.g. Bayesian sampling), and are therefore more amenable to parallel evaluation of the function of interest.
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
 We see that when the function has a distinct feature---such as with the peak and tanh---adaptive sampling performs much better.
