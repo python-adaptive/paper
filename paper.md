@@ -36,12 +36,12 @@ However, if the goal of the simulation is to approximate a continuous function u
 Such a sampling strategy (i.e., in Fig. @fig:algo) would trivially speedup many simulations.
 Another advantage of such an algorithm is that it may be parallelized cheaply (i.e. more than one point may be sampled at a time), as we do not need to perform a global computation over all the data (as we would with Bayesian sampling) when determining which points to sample next.
 
-![Visualization of a 1-D point choosing algorithm for a black-box function (grey).
+![Visualization of a 1-D sampling strategy for a black-box function (grey).
 We start by calculating the two boundary points.
-Two consecutive existing data points (black) $\{x_i, y_i\}$ define an interval.
+Two adjacent existing data points (black) $\{x_i, y_i\}$ define an interval.
 Each interval has a loss $L_{i,i+1}$ associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$ and optionally of $N$ next nearest neighbouring intervals.
 At each iteration the interval with the largest loss is indicated (red), with its corresponding candidate point (green) picked in the middle of the interval.
-The loss function in this example is the curvature loss.
+The loss function in this example is an approximation to the curvature, calculated using the data from an interval and its nearest neighbors.
 ](figures/algo.pdf){#fig:algo}
 
 #### We describe a class of algorithms relying on local criteria for sampling, which allow for easy parallelization and have a low overhead.
