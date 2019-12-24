@@ -467,25 +467,30 @@ For more details on how to use Adaptive, we recommend reading the tutorial insid
 # Possible extensions
 
 #### Anisotropic triangulation would improve the algorithm.
-The current implementation of choosing the candidate point inside a simplex (triangle in 2D) with the highest loss, for the `LearnerND`, works by either picking a point (1) in the center of the simplex or (2) by picking a point on the longest edge of the simplex.
-The choice depends on the shape of the simplex, where the algorithm tries to create regular simplices.
-Alternatively, a good strategy is choosing points somewhere on the edge of a triangle such that the simplex aligns with the gradient of the function; creating an anisotropic triangulation [@Dyn1990].
+One of the fundamental operations in the adaptive algorithm is selecting a point from within a subdomain.
+The current implementation uses simplices for subdomains (triangles in 2D, tetrahedrons in 3D), and picks a point either (1) in the center of the simplex or (2) on the longest edge of the simplex.
+The choice depends on the shape of the simplex; the center is only used if using the longest edge would produce unacceptably thin simplices.
+A better strategy may be to choose points on the edge of a simplex such that the simplex aligns with the gradient of the function, creating an anisotropic triangulation [@Dyn1990].
 This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
 
 #### Learning stochastic functions is a promising direction.
-Stochastic functions frequently appear in numerical sciences.
-Currently, Adaptive has a `AverageLearner` that samples a stochastic function with no degrees of freedom until a certain standard error of the mean is reached.
+Stochastic processes frequently appear in numerical sciences.
+Currently, Adaptive has an `AverageLearner` that samples a random variable (modelled as a function that takes no parameters and returns a different value each time it is called) until the mean is known to within a certain standard error.
 This is advantageous because no predetermined number of samples has to be set before starting the simulation.
-Extending this learner to be able to deal with more dimensions would be a useful addition.
+Extending this learner to be able to deal with stochastic functions in arbitrary dimensions would be a useful addition.
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
 Finally, there is the potential to use Adaptive for experimental control.
-Experiments often deal with noise, which could be solved by taking multiple measurements and averaging over the outcomes, such as the (not yet existing) `AverageLearnerND` will do.
-Another challenge in experiments is that changing parameters can be slow.
-Sweeping over one dimension might be faster than in others; for example, in condensed matter physics experiments, sweeping the magnetic field is much slower than sweeping frequencies.
-Additionally, some experiments exhibit hysteresis, which means that the sampling direction has to be restricted to certain paths.
-All these factors have to be taken into account to create a general-purpose sampler that can be used for experiments.
-However, Adaptive can already be used in experiments that are not restricted by the former effects.
+There are a number of challenges associated with this usecase.
+Firstly, experimental results are typically stochastic (due to noise), and would require sampling the same point in parameter space several times.
+This aspect is closely associated with sampling stochastic functions discussed in the preceding paragraph.
+Secondly, in an experiment one typically cannot jump around arbitrary quickly in parameter space.
+It may be faster to sweep one parameter compared to another; for example, in condensed matter physics experiments, sweeping magnetic field is much slower than sweeping voltage source frequency.
+Lastly, some experiments exhibit hysteresis.
+This means that results may not be reproducible if a different path is taken through parameter space.
+In such a case one would need to restrict the sampling to only occur along a certain path in parameter space.
+Incorporating such extensions into Adaptive would require adding a significant amount of extra logic, as learners would need to take into account not only the data available, but the order in which the data was obtained, and the timing statistics at different points in parameter space.
+Despite these challenges, however, Adaptive can already be used in experiments that are not restricted in these ways.
 
 <!-- We can include things like:
 * Asymptotically complexity of algorithms
