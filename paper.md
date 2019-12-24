@@ -113,7 +113,7 @@ Therefore, mesh optimization does not fit our workflow because expensive global 
 Computer graphics uses similar adaptive methods where a smooth surface can represent a surface via a coarser piecewise linear polygon mesh, called a subdivision surface [@DeRose1998].
 An example of such a polygonal remeshing method is one where the polygons align with the curvature of the space or field; this is called anisotropic meshing [@Alliez2003].
 
-# Design constraints and the general algorithm
+# Design constraints and the general algorithm{#sec:design}
 
 #### We aim to sample low to intermediate cost functions in parallel.
 The general algorithm that we describe in this paper works best for low to intermediate cost functions.
@@ -280,7 +280,7 @@ Where we have used identical definitions to the serial case for `f`, `data`, `lo
 
 : An object that can submit function evaluations to computing resources and retrieve results. Supports the following methods: `submit(f, x)`, schedule the execution of `f(x)` and do not block ; `get_one_result()`, block waiting for a single result, returning the pair `(x, y)` as soon as it becomes available; `ncores`, the total number of parallel processing units; `n_outstanding_points`, the number of function evaluations that have been requested and not yet retrieved, incremented by `submit` and decremented by `get_one_result`.
 
-# Loss function design
+# Loss function design{#sec:loss}
 
 #### Sampling in different problems pursues different goals
 Not all goals are achieved by using an identical sampling strategy; the specific problem determines the goal.
@@ -361,42 +361,29 @@ The isoline in the homogeneous case consists of 62 line segments and the adaptiv
 #### The learner abstracts a loss based priority queue.
 We will now introduce Adaptive's API.
 The object that can suggest points based on existing data is called a *learner*.
-The learner abstracts a loss based priority queue.
-We can either *ask* it for points or *tell* the *learner* new data points.
-We can define a *learner* as follows
+The learner abstracts the sampling strategy based on a priority queue and local loss functions that we described in @sec:design.
+We define a learner as follows:
 ```python
 from adaptive import Learner1D
 
-def peak(x): # pretend this is a slow function
+def f(x):
     a = 0.01
     return x + a**2 / (a**2 + x**2)
 
-learner = Learner1D(peak, bounds=(-1, 1))
-
+learner = Learner1D(f, bounds=(-1, 1))
 ```
-
-#### The runner orchestrates the function evaluation.
-To drive the learner manually (not recommended) and sequentially, we can do
+We provide the function to learn, the domain boundaries, and use a default loss function.
+We can then *ask* the learner for points:
 ```python
-def goal(learner):
-    # learner.loss() = max(learner.losses)
-    return learner.loss() < 0.01
-
-while not goal(learner):
-    points, loss_improvements = learner.ask(n=1)
-    for x in points:  # len(points) == 1
-        y = f(x)
-        learner.tell(x, y)
+points, priorities = learner.ask(4)
 ```
-To do this automatically (recommended) and in parallel (by default on all cores available) use
+The learner gives us back the points that we should sample next, as well as the priorities of these points (the loss of the parent subdomains).
+We can then evaluate some of these points and *tell* the learner about the results:
 ```python
-from adaptive import Runner
-runner = Runner(learner, goal)
+data = [learner.function(x) for x in points]
+learner.tell_many(points, data)
 ```
-This will return immediately because the calculation happens in the background.
-That also means that as the calculation is in progress, `learner.data` is accessible and can be plotted with `learner.plot()`.
-Additionally, in a Jupyter notebook environment, we can call `runner.live_info()` to display useful information.
-To change the loss function for the `Learner1D` we pass a loss function, like
+To change the loss function we pass a function that takes points and values, like so:
 ```python
 def distance_loss(xs, ys): # used by default
     dx = xs[1] - xs[0]
@@ -405,7 +392,7 @@ def distance_loss(xs, ys): # used by default
 
 learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=distance_loss)
 ```
-Creating a homogeneous loss function is as simple as
+If we wanted to create the "volume loss" discussed in @sec:loss we could simply write:
 ```python
 def uniform_loss(xs, ys):
     dx = xs[1] - xs[0]
@@ -413,6 +400,37 @@ def uniform_loss(xs, ys):
 
 learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=uniform_loss)
 ```
+
+#### The runner orchestrates the function evaluation.
+The previous example shows how we can drive the learner manually.
+For example, to run the learner until the loss is below `0.01` we could do the following:
+```python
+def goal(learner):
+    return learner.loss() < 0.01
+
+while not goal(learner):
+    (x,), _ = learner.ask(1)
+      y = f(x)
+      learner.tell(x, y)
+```
+This approach allows for the best *adaptive* performance (i.e. fewest number of points to reach the goal) because the learner has maximal information about `f` every time we ask it for the next point.
+However this does not allow to take advantage of multiple cores, which may enable better *walltime* performance (i.e. time to reach the goal).
+Adaptive abstracts the task of driving the learner and executing `f` in parallel to a *Runner*:
+```python
+from adaptive import Runner
+runner = Runner(learner, goal)
+```
+The above code uses the default parallel execution context, which occupies all the cores on the machine.
+It is simple to use *ipyparallel* to enable calculations on a cluster:
+```python
+import ipyparallel
+
+runner = Runner(learner, goal, executor=ipyparallel.Client())
+```
+If the above code is run in a Jupyter notebook it will not block.
+Adaptive takes advantage of the capabilities of the IPython to execute concurrently with the Python kernel.
+This means that as the calculation is in progress the data is accessible without race conditions via `learner.data`, and can be plotted with `learner.plot()`.
+Additionally, in a Jupyter notebook environment, we can call `runner.live_info()` to display useful information about the ongoing calculation.
 
 We have also implemented a `LearnerND` with a similar API
 ```python
@@ -431,7 +449,7 @@ Again, it is possible to specify a custom loss function using the `loss_per_simp
 
 #### The BalancingLearner can run many learners simultaneously.
 Frequently, more than one function (learner) needs to run at once, to do this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
-This learner internally asks all child learners for points and will choose the point of the learner that maximizes the loss improvement; thereby, it balances the resources over the different learners.
+This learner internally asks all child learners for points and will choose the point of the learner that maximizes the loss improvement; it balances the resources over the different learners.
 We can use it like
 ```python
 from functools import partial
@@ -443,7 +461,6 @@ def f(x, pow):
 learners = [Learner1D(partial(f, pow=i)), bounds=(-10, 10) for i in range(2, 10)]
 bal_learner = BalancingLearner(learners)
 runner = Runner(bal_learner, goal)
-
 ```
 For more details on how to use Adaptive, we recommend reading the tutorial inside the documentation [@Nijholt2018].
 
