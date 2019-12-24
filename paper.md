@@ -117,10 +117,10 @@ An example of such a polygonal remeshing method is one where the polygons align 
 
 #### We aim to sample low to intermediate cost functions in parallel.
 The general algorithm that we describe in this paper works best for low to intermediate cost functions.
-The point suggestion step happens in a single sequential process while the function executions can be in parallel.
+Determining the next candidate points happens in a single sequential process while the function executions can be in parallel.
 This means that to benefit from an adaptive sampling algorithm, that the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
-Extremely fast functions can be calculated on a dense grid, and extremely slow functions might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
-We are interested in an intermediate case, when one may not fully run a fitting of all available data at each step; still, a large class of functions is inside the right regime for adaptive sampling to be beneficial.
+Functions that are fast to evaluate can be calculated on a dense grid, and functions that are slow to evaluate might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
+We are interested in the intermediate case, when one wishes to sample adaptively, but cannot afford the luxury of fitting of all available data at each step. While this may seem restrictive, we assert that a large class of functions is inside the right regime for local adaptive sampling to be beneficial.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use the following approach, which operates on a constant-size subset of the data to determine which point to suggest next.
