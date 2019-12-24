@@ -194,13 +194,14 @@ A more complex loss function that also takes the first neighboring intervals int
 Figure @fig:Learner1D shows a comparison between a result using this loss and a function that is sampled on a grid.
 
 #### This algorithm has a logarithmic overhead when combined with an appropriate data structure
-The key data structure in the above algorithm is the priority queue of subdomains.
-It must support efficiently finding and removing the maximum priority element, as well as updating the priority of arbitrary elements whose priority is unknown (when updating the loss of neighboring subdomains).
+The key data structures in the above algorithm are `queue` and `domain`.
+The priority queue must support efficiently finding and removing the maximum priority element, as well as updating the priority of arbitrary elements whose priority is unknown (when updating the loss of neighboring subdomains).
 Such a datastructure can be achieved with a combination of a hashmap (mapping elements to their priority) and a red--black tree or a skip list [@Cormen2009] that stores `(priority, element)`.
 This has average complexity of $\mathcal{O}(\log{n})$ for all the required operations.
 In the reference implementation, we use the SortedContainers Python package [@Jenks2014], which provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
-Additionally, the algorithm requires efficient queries for subdomains that contain a point $x$, and the neighbors of a given subdomain.
-For the one-dimensional case this could be achieved by using a red--black tree to keep the points $x$ in ascending order.
+The `domain` object requires efficiently splitting a subdomain and querying the neighbors of a subdomain. For the one-dimensional case this can be achieved by using a red--black tree to keep the points $x$ in ascending order. In this case both operations have an average complexity of $\mathcal{O}(\log{n})$.
+In the reference implementation we again use SortedContainers.
+We thus see that by using the appropriate datastructures the time required to suggest a new point is $t_\textrm{suggest} \propto \mathcal{O}(\log{n})$. The total time spent on suggesting points when sampling $N$ points in total is thus $\mathcal{O}(N \log{N})$.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
