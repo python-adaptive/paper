@@ -137,8 +137,7 @@ The algorithm, therefore, works best in low dimensional space; typically calcula
 
 #### We summarize the algorithm with pseudocode
 
-The algorithm descried above can be summarized by the following pseudocode.
-In the following `queue` is the priority queue of subdomains, `domain` is an object that allows to efficiently query the neighbors of a subdomain and all subdomains containing a point $x$, `data` is a hashmap storing the points and their values, and `loss` is the loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
+The algorithm described above can be made more precise by the following Python code:
 
 ```python
 first_subdomain, = domain.subdomains()
@@ -166,6 +165,28 @@ while queue.max_priority() < target_loss:
     for subdomain in subdomains_to_update:
       queue.update(subdomain, priority=loss(domain, subdomain, data))
 ```
+
+where we have used the following definitions:
+
+`f`
+
+: The function we wish to learn
+
+`queue`
+
+: A priority queue of unique elements, supporting the following methods: `max_priority()`, to get the priority of the top element; `pop()`, remove and return the top element and its priority; `insert(element, priority)`, insert the given element with the given priority into the queue;`update(element, priority)`, update the priority of the given element, which is already in the queue.
+
+`domain`
+
+: An object representing the domain of `f` split into subdomains. Supports the following methods: `subdomains()`, returns all the subdomains; `points(subdomain)`, returns all the points contained in the provided subdomain; `split(subdomain)`, splits a subdomain into smaller subdomains, returning the new points and new subdomains produced as a result; `neighbors(subdomain, n_neighbors)`, returns the subdomains neighboring the provided subdomain.
+
+`data`
+
+: A hashmap storing the points `x` and their values `f(x)`.
+
+`loss(domain, subdomain, data)`
+
+: The loss function, with `loss.n_neighbors` being the degree of neighboring subdomains that the loss function uses.
 
 #### As an example, the interpoint distance is a good loss function in one dimension.
 An example of such a local loss function for a one-dimensional function is the interpoint distance, i.e. given a subdomain (interval) $(x_\textrm{a}, x_\textrm{b})$ with values $(y_\textrm{a}, y_\textrm{b})$ the loss is $\sqrt{(x_\textrm{a} - x_\textrm{b})^2 + (y_\textrm{a} - y_\textrm{b})^2}$.
