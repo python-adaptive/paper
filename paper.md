@@ -294,7 +294,7 @@ For example, quadrature rules requires a denser sampling of the subdomains where
 These different sampling goals each require a loss function tailored to the specific case.
 
 #### Different loss functions tailor sampling performance for different classes of functions
-Additionally, it is important to take into account the class of functions being learned when selecting a loss function, even if the specific goal (e.g. continuity of the approximation) remains unchanged.
+Additionally, it is important to take the class of functions being learned when selecting a loss function into account, even if the specific goal (e.g. continuity of the approximation) remains unchanged.
 For example, if we wanted a smooth approximation to a function with a singularity, then the interpoint distance loss function would be a poor choice, even if it is generally a good choice for that specified goal.
 This is because the aforementioned loss function will "lock on" to the singularity, and will fail to sample the function elsewhere once it starts.
 This is an illustration of the following principle: for optimal sampling performance, loss functions should be tailored to the particular domain of interest.
@@ -305,7 +305,7 @@ For example, to limit the over-sampling of singularities inherent in the distanc
 
 #### Adding loss functions allows for balancing between multiple priorities.
 Another general strategy for designing loss functions is to combine existing loss functions that optimize for particular features, and then combine them together.
-Typically one weights the different constituent losses so as to prioritize the different features.
+Typically one weights the different constituent losses to prioritize the different features.
 For example, combining a loss function that calculates the curvature with a distance loss function will sample regions with high curvature more densely, while ensuring continuity.
 Another important example is combining a loss function with the volume of the subdomain, which will ensure that the sampling is asymptotically dense everywhere (because large subdomains will have a correspondingly large loss).
 This is important if there are many distinct and narrow features that all need to be found, and densely sampled in the region around the feature.
