@@ -54,7 +54,8 @@ The algorithm visualized in @fig:algo consists of the following steps:
 (5) discard the interval $(x_i, x_j)$ and create two new intervals $(x_i, x_\textrm{new})$ and $(x_\textrm{new}, x_j)$, calculating their losses $L_{x_i, x_\textrm{new}}$ and $L_{x_\textrm{new}, x_j}$
 (6) repeat from step 3.
 
-In this paper we present a class of algorithms that generalizes the above example. This general class of algorithms is based on using a *priority queue* of subdomains (intervals in 1-D), ordered by a *loss* obtained from a *local loss function* (which depends only on the data local to the subdomain), and greedily selecting points from subdomains at the top of the priority queue.
+In this paper we present a class of algorithms that generalizes the above example.
+This general class of algorithms is based on using a *priority queue* of subdomains (intervals in 1-D), ordered by a *loss* obtained from a *local loss function* (which depends only on the data local to the subdomain), and greedily selecting points from subdomains at the top of the priority queue.
 The advantage of these *local* algorithms is that they have a lower computational overhead than algorithms requiring *global* data and updates (e.g. Bayesian sampling), and are therefore more amenable to parallel evaluation of the function of interest.
 
 ![Comparison of homogeneous sampling (top) with adaptive sampling (bottom) for different one-dimensional functions (red) where the number of points in each column is identical.
@@ -120,7 +121,8 @@ The general algorithm that we describe in this paper works best for low to inter
 Determining the next candidate points happens in a single sequential process while the function executions can be in parallel.
 This means that to benefit from an adaptive sampling algorithm, that the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
 Functions that are fast to evaluate can be calculated on a dense grid, and functions that are slow to evaluate might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
-We are interested in the intermediate case, when one wishes to sample adaptively, but cannot afford the luxury of fitting of all available data at each step. While this may seem restrictive, we assert that a large class of functions is inside the right regime for local adaptive sampling to be beneficial.
+We are interested in the intermediate case, when one wishes to sample adaptively, but cannot afford the luxury of fitting of all available data at each step.
+While this may seem restrictive, we assert that a large class of functions is inside the right regime for local adaptive sampling to be beneficial.
 
 #### We propose to use a local loss function as a criterion for choosing the next point.
 Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use the following approach, which operates on a constant-size subset of the data to determine which point to suggest next.
@@ -199,9 +201,12 @@ The priority queue must support efficiently finding and removing the maximum pri
 Such a datastructure can be achieved with a combination of a hashmap (mapping elements to their priority) and a red--black tree or a skip list [@Cormen2009] that stores `(priority, element)`.
 This has average complexity of $\mathcal{O}(\log{n})$ for all the required operations.
 In the reference implementation, we use the SortedContainers Python package [@Jenks2014], which provides an efficient implementation of such a data structure optimized for realistic sizes, rather than asymptotic complexity.
-The `domain` object requires efficiently splitting a subdomain and querying the neighbors of a subdomain. For the one-dimensional case this can be achieved by using a red--black tree to keep the points $x$ in ascending order. In this case both operations have an average complexity of $\mathcal{O}(\log{n})$.
+The `domain` object requires efficiently splitting a subdomain and querying the neighbors of a subdomain.
+For the one-dimensional case this can be achieved by using a red--black tree to keep the points $x$ in ascending order.
+In this case both operations have an average complexity of $\mathcal{O}(\log{n})$.
 In the reference implementation we again use SortedContainers.
-We thus see that by using the appropriate datastructures the time required to suggest a new point is $t_\textrm{suggest} \propto \mathcal{O}(\log{n})$. The total time spent on suggesting points when sampling $N$ points in total is thus $\mathcal{O}(N \log{N})$.
+We thus see that by using the appropriate datastructures the time required to suggest a new point is $t_\textrm{suggest} \propto \mathcal{O}(\log{n})$.
+The total time spent on suggesting points when sampling $N$ points in total is thus $\mathcal{O}(N \log{N})$.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
 So far, the description of the general algorithm did not include parallelism.
@@ -278,7 +283,8 @@ Where we have used identical definitions to the serial case for `f`, `data`, `lo
 
 `executor`
 
-: An object that can submit function evaluations to computing resources and retrieve results. Supports the following methods: `submit(f, x)`, schedule the execution of `f(x)` and do not block ; `get_one_result()`, block waiting for a single result, returning the pair `(x, y)` as soon as it becomes available; `ncores`, the total number of parallel processing units; `n_outstanding_points`, the number of function evaluations that have been requested and not yet retrieved, incremented by `submit` and decremented by `get_one_result`.
+: An object that can submit function evaluations to computing resources and retrieve results.
+Supports the following methods: `submit(f, x)`, schedule the execution of `f(x)` and do not block ; `get_one_result()`, block waiting for a single result, returning the pair `(x, y)` as soon as it becomes available; `ncores`, the total number of parallel processing units; `n_outstanding_points`, the number of function evaluations that have been requested and not yet retrieved, incremented by `submit` and decremented by `get_one_result`.
 
 # Loss function design{#sec:loss}
 
@@ -294,10 +300,12 @@ This is because the aforementioned loss function will "lock on" to the singulari
 This is an illustration of the following principle: for optimal sampling performance, loss functions should be tailored to the particular domain of interest.
 
 #### Loss function regularization avoids singularities
-One strategy for designing loss functions is to take existing loss functions and apply a regularization. For example, to limit the over-sampling of singularities inherent in the distance loss we can set the loss of subdomains that are smaller than a given threshold to zero, which will prevent them from being sampled further.
+One strategy for designing loss functions is to take existing loss functions and apply a regularization.
+For example, to limit the over-sampling of singularities inherent in the distance loss we can set the loss of subdomains that are smaller than a given threshold to zero, which will prevent them from being sampled further.
 
 #### Adding loss functions allows for balancing between multiple priorities.
-Another general strategy for designing loss functions is to combine existing loss functions that optimize for particular features, and then combine them together. Typically one weights the different constituent losses so as to prioritize the different features.
+Another general strategy for designing loss functions is to combine existing loss functions that optimize for particular features, and then combine them together.
+Typically one weights the different constituent losses so as to prioritize the different features.
 For example, combining a loss function that calculates the curvature with a distance loss function will sample regions with high curvature more densely, while ensuring continuity.
 Another important example is combining a loss function with the volume of the subdomain, which will ensure that the sampling is asymptotically dense everywhere (because large subdomains will have a correspondingly large loss).
 This is important if there are many distinct and narrow features that all need to be found, and densely sampled in the region around the feature.
