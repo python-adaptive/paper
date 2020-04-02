@@ -1,5 +1,5 @@
 ---
-title:  '*Adaptive*: an adaptive parallel sampling algorithm for mathematical functions based on local local criteria'
+title:  '*Adaptive*: parallel active learning of mathematical functions'
 journal: 'PeerJ'
 author:
 - name: Tinkerer
