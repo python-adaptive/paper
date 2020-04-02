@@ -369,10 +369,10 @@ def isoline_loss_function(level, priority):
 
 See Fig. @fig:isoline for a comparison with uniform sampling.
 
-![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same amount of points $n=17^2=289$.
+![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same amount of points $n=12^2=144$.
 We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
 The solid line (black) indicates the isoline at $f(x,y)=0.1$.
-The isoline in the homogeneous case consists of 62 line segments and the adaptive case consists of 147 line segments.
+The isoline in the homogeneous case consists of 43 line segments and the adaptive case consists of 94 line segments.
 ](figures/isoline.pdf){#fig:isoline}
 
 # Implementation and benchmarks
