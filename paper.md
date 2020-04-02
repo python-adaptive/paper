@@ -5,7 +5,7 @@ author:
 - name: Tinkerer
   affiliation:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
-  email: not_anton@antonakhmerov.org
+  email: bas@nijho.lt
 abstract: |
   Large scale computer simulations are time-consuming to run and often require sweeps over input parameters to obtain a qualitative understanding of the simulation output.
   These sweeps of parameters can potentially make the simulations prohibitively expensive.
