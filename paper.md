@@ -39,7 +39,7 @@ Another advantage of such an algorithm is that it may be parallelized cheaply (i
 ![Visualization of a 1-D sampling strategy for a black-box function (grey).
 We start by calculating the two boundary points.
 Two adjacent existing data points (black) $\{x_i, y_i\}$ define an interval.
-Each interval has a loss $L_{i,i+1}$ associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$ and optionally of $N$ next nearest neighbouring intervals.
+Each interval has a loss $L_{i,i+1}$ associated with it that can be calculated from the points inside the interval $L_{i,i+1}(x_i, x_{i+1}, y_i, y_{i+1})$ and optionally of $N$ next nearest neighboring intervals.
 At each iteration the interval with the largest loss is indicated (red), with its corresponding candidate point (green) picked in the middle of the interval.
 The loss function in this example is an approximation to the curvature, calculated using the data from an interval and its nearest neighbors.
 ](figures/algo.pdf){#fig:algo}
@@ -205,7 +205,7 @@ The `domain` object requires efficiently splitting a subdomain and querying the 
 For the one-dimensional case this can be achieved by using a red--black tree to keep the points $x$ in ascending order.
 In this case both operations have an average complexity of $\mathcal{O}(\log{n})$.
 In the reference implementation we again use SortedContainers.
-We thus see that by using the appropriate datastructures the time required to suggest a new point is $t_\textrm{suggest} \propto \mathcal{O}(\log{n})$.
+We thus see that by using the appropriate data structures the time required to suggest a new point is $t_\textrm{suggest} \propto \mathcal{O}(\log{n})$.
 The total time spent on suggesting points when sampling $N$ points in total is thus $\mathcal{O}(N \log{N})$.
 
 #### With many points, due to the loss being local, parallel sampling incurs no additional cost.
@@ -325,7 +325,7 @@ We can generalize this loss to $N$ dimensions, where the triangle is replaced by
 In this example, we start with 6 points (a) on the function (grey).
 Ignoring the endpoints, the effective area of each point is determined by its associated triangle (b).
 The loss of each interval can be computed by taking the average area of the adjacent triangles.
-Subplots (c), (d), and (e) show the subsequent interations following (b).](figures/line_loss.pdf){#fig:line_loss}
+Subplots (c), (d), and (e) show the subsequent iterations following (b).](figures/line_loss.pdf){#fig:line_loss}
 
 In order to compare sampling strategies, we need to define some error.
 We construct a linear interpolation function $\tilde{f}$, which is an approximation of $f$.
@@ -500,7 +500,7 @@ Extending this learner to be able to deal with stochastic functions in arbitrary
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
 Finally, there is the potential to use Adaptive for experimental control.
-There are a number of challenges associated with this usecase.
+There are a number of challenges associated with this use case.
 Firstly, experimental results are typically stochastic (due to noise), and would require sampling the same point in parameter space several times.
 This aspect is closely associated with sampling stochastic functions discussed in the preceding paragraph.
 Secondly, in an experiment one typically cannot jump around arbitrary quickly in parameter space.
