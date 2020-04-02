@@ -355,8 +355,19 @@ All points inside the intervals can be trivially calculated in parallel; however
 Here, we choose to always increase until $d=4$, after which the interval is split.
 
 ## isoline and isosurface sampling
-We can find isolines or isosurfaces using a loss function that prioritizes intervals that are closer to the function values that we are interested in.
-See Fig. @fig:isoline.
+A judicious choice of loss function allows to sample the function close to an isoline (isosurface in 2D). Specifically, we prioritize subdomains that are bisected by the isoline or isosurface:
+
+```python
+def isoline_loss_function(level, priority):
+    def loss(simplex, values, value_scale):
+        values = np.array(values)
+        which_side = np.sign(level * value_scale - values)
+        crosses_isoline = np.any(np.diff(which_side))
+        return volume(simplex)* (1 + priority * crosses_isoline)
+    return loss
+```
+
+See Fig. @fig:isoline for a comparison with uniform sampling.
 
 ![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same amount of points $n=17^2=289$.
 We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
