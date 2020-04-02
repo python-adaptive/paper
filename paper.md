@@ -510,13 +510,3 @@ This means that results may not be reproducible if a different path is taken thr
 In such a case one would need to restrict the sampling to only occur along a certain path in parameter space.
 Incorporating such extensions into Adaptive would require adding a significant amount of extra logic, as learners would need to take into account not only the data available, but the order in which the data was obtained, and the timing statistics at different points in parameter space.
 Despite these challenges, however, Adaptive can already be used in experiments that are not restricted in these ways.
-
-<!-- We can include things like:
-* Asymptotically complexity of algorithms
-* Setting of the problem, which classes of problems can be handled with Adaptive
-* Loss-functions examples (maybe include [Adaptive quantum dots](https://chat.quantumtinkerer.tudelft.nl/chat/channels/adaptive-quantum-dots))
-* Trials, statistics (such as measuring timings)
-* Line simplification algorithm as a general criterium
-* Desirable properties of loss-functions
-* List potential applications
- -->
