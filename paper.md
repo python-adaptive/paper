@@ -176,7 +176,7 @@ where we have used the following definitions:
 
 `queue`
 
-: A priority queue of unique elements, supporting the following methods: `max_priority()`, to get the priority of the top element; `pop()`, remove and return the top element and its priority; `insert(element, priority)`, insert the given element with the given priority into the queue;`update(element, priority)`, update the priority of the given element, which is already in the queue.
+: A priority queue of unique elements, supporting the following methods: `max_priority()`, to get the priority of the top element; `pop()`, remove and return the top element and its priority; `insert(element, priority)`, insert the given element with the given priority into the queue; `update(element, priority)`, update the priority of the given element, which is already in the queue.
 
 `domain`
 
