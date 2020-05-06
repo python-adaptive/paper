@@ -142,6 +142,7 @@ The algorithm, therefore, works best in low dimensional space; typically calcula
 The algorithm described above can be made more precise by the following Python code:
 
 ```python
+# First evaluate the bounds of the domain
 first_subdomain, = domain.subdomains()
 for x in domain.points(first_subdomain):
   data[x] = f(x)
@@ -226,6 +227,7 @@ def priority(domain, subdomain, data):
     L_0 = loss(domain, subdomain, data)
     return max_relative_subvolume * L_0
 
+# First evaluate the bounds of the domain
 first_subdomain, = domain.subdomains()
 for x in domain.points(first_subdomain):
   data[x] = f(x)
