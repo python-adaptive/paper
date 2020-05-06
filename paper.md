@@ -260,7 +260,7 @@ while executor.n_outstanding_points > 0:
 
   # If it looks like we're done, don't send more work
   if queue.max_priority() < target_loss:
-    continue
+    break
 
   # Send as many points for evaluation as we have compute cores
   for _ in range(executor.ncores - executor.n_outstanding_points)
