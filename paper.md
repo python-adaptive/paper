@@ -476,7 +476,7 @@ runner = Runner(learner, loss_goal=0.01)
 ```
 
 Again, it is possible to specify a custom loss function using the `loss_per_simplex` argument.
-The pure-Python triangulation that backs the `LearnerND` can optionally be replaced by a Rust implementation (the `adaptive-triangulation` package), which significantly reduces $t_\textrm{suggest}$ when the number of points becomes large.
+The pure-Python triangulation that backs the `LearnerND` can optionally be replaced by a Rust implementation (the `adaptive-triangulation` package), aimed at reducing $t_\textrm{suggest}$ when the number of points becomes large.
 
 #### The BalancingLearner can run many learners simultaneously.
 Frequently, more than one function (learner) needs to run at once, to do this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
@@ -497,13 +497,13 @@ For more details on how to use Adaptive, we recommend reading the tutorial insid
 
 # Possible extensions
 
-#### Anisotropic triangulation improves the algorithm.
+#### Anisotropic triangulation may improve the algorithm.
 One of the fundamental operations in the adaptive algorithm is selecting a point from within a subdomain.
 The basic implementation uses simplices for subdomains (triangles in 2D, tetrahedrons in 3D), and picks a point either (1) in the center of the simplex or (2) on the longest edge of the simplex.
 The choice depends on the shape of the simplex; the center is only used if using the longest edge would produce unacceptably thin simplices.
-A better strategy is to choose points such that the simplices align with the gradient of the function, creating an anisotropic triangulation [@Dyn1990]; this is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
-The `LearnerND` implements this strategy as an option (`anisotropic=True`), stretching the triangulation along the local gradient when choosing new points.
-This option is currently limited to scalar-valued functions; extending it to vector-valued functions is a possible improvement.
+A better strategy may be to choose points such that the simplices align with the gradient of the function, creating an anisotropic triangulation [@Dyn1990]; this is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
+The `LearnerND` implements this strategy as an opt-in feature (`anisotropic=True`), stretching the triangulation along the local gradient when choosing new points.
+It is currently limited to scalar-valued functions, and we have not yet quantified its benefit; extending it to vector-valued functions and benchmarking it remain future work.
 
 #### Learning stochastic functions is a promising direction.
 Stochastic processes frequently appear in numerical sciences.
