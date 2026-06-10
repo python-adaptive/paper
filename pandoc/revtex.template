@@ -84,7 +84,9 @@
 $for(author)$
 $if(author.name)$
 \author{$author.name$}
+$if(author.email)$
 \email[Electronic address: ]{$author.email$}
+$endif$
 $for(author.affiliation)$
 \affiliation{$author.affiliation$}
 $endfor$
