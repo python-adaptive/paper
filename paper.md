@@ -385,7 +385,7 @@ See Fig. @fig:isoline for a comparison with uniform sampling.
 ![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same number of points $n=12^2=144$.
 We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
 The solid line (black) indicates the isoline at $f(x,y)=0.1$.
-The isoline in the homogeneous case consists of 43 line segments and the adaptive case consists of 94 line segments.
+Adaptive sampling traces the isoline more accurately: the mean (Hausdorff) distance between the estimated and the true isoline is $7.4\times10^{-3}$ ($3.0\times10^{-2}$) for homogeneous sampling and $1.2\times10^{-3}$ ($1.4\times10^{-2}$) for adaptive sampling, a factor 6 (2) improvement.
 ](figures/isoline.pdf){#fig:isoline}
 
 # Implementation and benchmarks
