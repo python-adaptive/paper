@@ -2,10 +2,20 @@
 title:  '*Adaptive*: parallel active learning of mathematical functions'
 journal: 'PeerJ'
 author:
-- name: Tinkerer
+- name: Bas Nijholt
   affiliation:
     - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
+    - IonQ, 3755 Monte Villa Parkway, Bothell, Washington 98021, USA
   email: bas@nijho.lt
+- name: Joseph Weston
+  affiliation:
+    - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
+- name: Jorn Hoofwijk
+  affiliation:
+    - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
+- name: Anton Akhmerov
+  affiliation:
+    - Kavli Institute of Nanoscience, Delft University of Technology, P.O. Box 4056, 2600 GA Delft, The Netherlands
 abstract: |
   Large scale computer simulations are time-consuming to run and often require sweeps over input parameters to obtain a qualitative understanding of the simulation output.
   These sweeps of parameters can potentially make the simulations prohibitively expensive.
@@ -16,9 +26,10 @@ abstract: |
   This approach works well, even when using hundreds of computers simultaneously because the point suggestion algorithm is cheap (fast) to evaluate.
   We provide a reference implementation in Python and show its performance.
 acknowledgements: |
-  We'd like to thank ...
+  We thank Pedro Gonnet for his implementation of the CQUAD algorithm, on which our parallelized integration learner is based, and Pauli Virtanen for his `AdaptiveTriSampling` script, which served as inspiration for the `adaptive.Learner2D`.
+  We are grateful to everyone who contributed to the open-source development of Adaptive by reporting issues and submitting patches.
 contribution: |
-  Bla
+  All authors contributed to the design of the algorithms, the implementation of the Adaptive package, and the writing of the manuscript.
 ...
 
 # Introduction
@@ -74,7 +85,7 @@ In all cases using Adaptive results in a higher fidelity plot.
 We provide a reference implementation, the open-source Python package called Adaptive [@Nijholt2019a], which has previously been used in several scientific publications [@Vuik2018; @Laeven2019; @Bommer2019; @Melo2019].
 It has algorithms for $f \colon \mathbb{R}^N \to \mathbb{R}^M$, where $N, M \in \mathbb{Z}^+$ but which work best when $N$ is small; integration in $\mathbb{R}$; and the averaging of stochastic functions.
 Most of our algorithms allow for a customizable loss function with which one can adapt the sampling algorithm to work optimally for different classes of functions.
-It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `ipyparallel`, `mpi4py`, and `dask.distributed`.
+It integrates with the Jupyter notebook environment as well as popular parallel computation frameworks such as `concurrent.futures`, `ipyparallel`, `loky`, `mpi4py`, and `dask.distributed`.
 It provides auxiliary functionality such as live-plotting, inspecting the data as the calculation is in progress, and automatically saving and loading of the data.
 
 The raw data and source code that produces all plots in this paper is available at \onlinecite{papercode}.
@@ -92,7 +103,7 @@ One form of OED is response-adaptive design [@Hu2006], which concerns the adapti
 Here, the acquired data (i.e., the observations) are used to estimate the uncertainties of a certain desired parameter.
 It then suggests further experiments that will optimally reduce these uncertainties.
 In this step of the calculation Bayesian statistics is frequently used.
-Bayesian statistics naturally provides tools for answering such questions; however, because it provides closed-form solutions, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples. <!-- references missing! -->
+Bayesian statistics naturally provides tools for answering such questions; however, because closed-form solutions are rarely available, Markov chain Monte Carlo (MCMC) sampling is the standard tool for determining the most promising samples [@Chaloner1995; @Ryan2015].
 In a typical non-adaptive experiment, decisions on which experiments to perform are made in advance.
 
 #### Plotting and low dimensional integration uses local sampling.
@@ -119,7 +130,7 @@ An example of such a polygonal remeshing method is one where the polygons align 
 #### We aim to sample low to intermediate cost functions in parallel.
 The general algorithm that we describe in this paper works best for low to intermediate cost functions.
 Determining the next candidate points happens in a single sequential process while the function executions can be in parallel.
-This means that to benefit from an adaptive sampling algorithm, that the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
+This means that to benefit from an adaptive sampling algorithm, the time it takes to suggest a new point $t_\textrm{suggest}$ must be much smaller than the average function execution time $t_f$ over the number of parallel workers $N$: $t_f / N \gg t_\textrm{suggest}$.
 Functions that are fast to evaluate can be calculated on a dense grid, and functions that are slow to evaluate might benefit from full-scale Bayesian optimization where $t_\textrm{suggest}$ is large.
 We are interested in the intermediate case, when one wishes to sample adaptively, but cannot afford the luxury of fitting of all available data at each step.
 While this may seem restrictive, we assert that a large class of functions is inside the right regime for local adaptive sampling to be beneficial.
@@ -127,7 +138,7 @@ While this may seem restrictive, we assert that a large class of functions is in
 #### We propose to use a local loss function as a criterion for choosing the next point.
 Because we aim to keep the suggestion time $t_\textrm{suggest}$ small, we propose to use the following approach, which operates on a constant-size subset of the data to determine which point to suggest next.
 We keep track of the subdomains in a priority queue, where each subdomain is assigned a priority called the "loss".
-To suggest a new point we remove the subdomain with the largest loss from the priority queue and select a new point $x_\textrm{new}$ from within it (typically in the centre)
+To suggest a new point we remove the subdomain with the largest loss from the priority queue and select a new point $x_\textrm{new}$ from within it (typically in the centre).
 This splits the subdomain into several smaller subdomains $\{S_i\}$ that each contain $x_\textrm{new}$ on their boundaries.
 After evaluating the function at $x_\textrm{new}$ we must then recompute the losses using the new data.
 We choose to consider loss functions that are "local", i.e. the loss for a subdomain depends only on the points contained in that subdomain and possibly a (small) finite number of neighboring subdomains.
@@ -149,8 +160,8 @@ for x in domain.points(first_subdomain):
 
 queue.insert(first_subdomain, priority=loss(domain, first_subdomain, data))
 
-while queue.max_priority() < target_loss:
-  loss, subdomain = queue.pop()
+while queue.max_priority() > target_loss:
+  max_loss, subdomain = queue.pop()
 
   new_points, new_subdomains = domain.split(subdomain)
   for x in new_points:
@@ -237,7 +248,7 @@ for x in new_points:
   data[x] = None
   executor.submit(f, x)
 
-queue.insert(first_subdomain, priority=priority(domain, subdomain, data))
+queue.insert(first_subdomain, priority=priority(domain, first_subdomain, data))
 
 while executor.n_outstanding_points > 0:
   x, y = executor.get_one_result()
@@ -247,7 +258,7 @@ while executor.n_outstanding_points > 0:
   # And calculate the losses for these new subdomains
   old_subdomains, new_subdomains = domain.split_at(x)
   for subdomain in old_subdomains:
-    queue.remove(old_subdomain)
+    queue.remove(subdomain)
   for subdomain in new_subdomains:
     queue.insert(subdomain, priority(domain, subdomain, data))
 
@@ -265,8 +276,8 @@ while executor.n_outstanding_points > 0:
     continue
 
   # Send as many points for evaluation as we have compute cores
-  for _ in range(executor.ncores - executor.n_outstanding_points)
-    loss, subdomain = queue.pop()
+  for _ in range(executor.ncores - executor.n_outstanding_points):
+    max_loss, subdomain = queue.pop()
     new_point, = domain.insert_points(subdomain, 1)
     data[new_point] = None
     executor.submit(f, new_point)
@@ -296,7 +307,7 @@ For example, quadrature rules requires a denser sampling of the subdomains where
 These different sampling goals each require a loss function tailored to the specific case.
 
 #### Different loss functions tailor sampling performance for different classes of functions
-Additionally, it is important to take the class of functions being learned when selecting a loss function into account, even if the specific goal (e.g. continuity of the approximation) remains unchanged.
+Additionally, it is important to take the class of functions being learned into account when selecting a loss function, even if the specific goal (e.g. continuity of the approximation) remains unchanged.
 For example, if we wanted a smooth approximation to a function with a singularity, then the interpoint distance loss function would be a poor choice, even if it is generally a good choice for that specified goal.
 This is because the aforementioned loss function will "lock on" to the singularity, and will fail to sample the function elsewhere once it starts.
 This is an illustration of the following principle: for optimal sampling performance, loss functions should be tailored to the particular domain of interest.
@@ -349,15 +360,15 @@ Here, we see that for homogeneous sampling to get the same error as sampling wit
 
 #### The `cquad` algorithm belongs to a class that is parallelizable.
 In @sec:review we mentioned the doubly-adaptive integration algorithm `CQUAD` [@Gonnet2010].
-This algorithm uses a Clenshaw-Curtis quadrature rules of increasing degree $d$ in each interval [@Clenshaw1960].
+This algorithm uses Clenshaw-Curtis quadrature rules of increasing degree $d$ in each interval [@Clenshaw1960].
 The error estimate is $\sqrt{\int{\left(f_0(x) - f_1(x)\right)^2}}$, where $f_0$ and $f_1$ are two successive interpolations of the integrand.
 To reach the desired total error, intervals with the maximum absolute error are improved.
 Either (1) the degree of the rule is increased or (2) the interval is split if either the function does not appear to be smooth or a rule of maximum degree ($d=4$) has been reached.
-All points inside the intervals can be trivially calculated in parallel; however, when there are more resources available than points, Adaptive needs to guess whether an (1) interval's should degree of the rule should be increased or (2) or the interval is split.
+All points inside the intervals can be trivially calculated in parallel; however, when there are more resources available than points, Adaptive needs to guess whether (1) the degree of the rule of an interval should be increased or (2) the interval should be split.
 Here, we choose to always increase until $d=4$, after which the interval is split.
 
-## isoline and isosurface sampling
-A judicious choice of loss function allows to sample the function close to an isoline (isosurface in 2D). Specifically, we prioritize subdomains that are bisected by the isoline or isosurface:
+## Isoline and isosurface sampling
+A judicious choice of loss function allows us to sample the function close to an isoline (an isosurface in 3D). Specifically, we prioritize subdomains that are bisected by the isoline or isosurface:
 
 ```python
 def isoline_loss_function(level, priority):
@@ -365,16 +376,16 @@ def isoline_loss_function(level, priority):
         values = np.array(values)
         which_side = np.sign(level * value_scale - values)
         crosses_isoline = np.any(np.diff(which_side))
-        return volume(simplex)* (1 + priority * crosses_isoline)
+        return volume(simplex) * (1 + priority * crosses_isoline)
     return loss
 ```
 
 See Fig. @fig:isoline for a comparison with uniform sampling.
 
-![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same amount of points $n=12^2=144$.
+![Comparison of isoline sampling of $f(x,y)=x^2 + y^3$ at $f(x,y)=0.1$ using homogeneous sampling (left) and adaptive sampling (right) with the same number of points $n=12^2=144$.
 We plot the function interpolated on a grid (color) with the triangulation on top (white) where the function is sampled on the vertices.
 The solid line (black) indicates the isoline at $f(x,y)=0.1$.
-The isoline in the homogeneous case consists of 43 line segments and the adaptive case consists of 94 line segments.
+Adaptive sampling traces the isoline more accurately: the mean (Hausdorff) distance between the estimated and the true isoline is $7.4\times10^{-3}$ ($3.0\times10^{-2}$) for homogeneous sampling and $1.2\times10^{-3}$ ($1.4\times10^{-2}$) for adaptive sampling, a factor 6 (2) improvement.
 ](figures/isoline.pdf){#fig:isoline}
 
 # Implementation and benchmarks
@@ -387,18 +398,18 @@ We define a learner as follows:
 ```python
 from adaptive import Learner1D
 
-def f(x):
+def peak(x):
     a = 0.01
     return x + a**2 / (a**2 + x**2)
 
-learner = Learner1D(f, bounds=(-1, 1))
+learner = Learner1D(peak, bounds=(-1, 1))
 ```
 We provide the function to learn, the domain boundaries, and use a default loss function.
 We can then *ask* the learner for points:
 ```python
-points, priorities = learner.ask(4)
+points, loss_improvements = learner.ask(4)
 ```
-The learner gives us back the points that we should sample next, as well as the priorities of these points (the loss of the parent subdomains).
+The learner gives us back the points that we should sample next, as well as the improvement of the loss that we can expect by evaluating each point (based on the loss of the parent subdomains).
 We can then evaluate some of these points and *tell* the learner about the results:
 ```python
 data = [learner.function(x) for x in points]
@@ -426,30 +437,28 @@ learner = Learner1D(peak, bounds=(-1, 1), loss_per_interval=uniform_loss)
 The previous example shows how we can drive the learner manually.
 For example, to run the learner until the loss is below `0.01` we could do the following:
 ```python
-def goal(learner):
-    return learner.loss() < 0.01
-
-while not goal(learner):
+while learner.loss() > 0.01:
     (x,), _ = learner.ask(1)
-      y = f(x)
-      learner.tell(x, y)
+    y = peak(x)
+    learner.tell(x, y)
 ```
 This approach allows for the best *adaptive* performance (i.e. fewest number of points to reach the goal) because the learner has maximal information about `f` every time we ask it for the next point.
-However this does not allow to take advantage of multiple cores, which may enable better *walltime* performance (i.e. time to reach the goal).
+However this does not allow us to take advantage of multiple cores, which may enable better *walltime* performance (i.e. time to reach the goal).
 Adaptive abstracts the task of driving the learner and executing `f` in parallel to a *Runner*:
 ```python
 from adaptive import Runner
-runner = Runner(learner, goal)
+runner = Runner(learner, loss_goal=0.01)
 ```
+Besides a `loss_goal`, the runner also accepts a target number of points (`npoints_goal`), a time-based goal, or an arbitrary `goal` function that takes the learner and returns a boolean.
 The above code uses the default parallel execution context, which occupies all the cores on the machine.
 It is simple to use *ipyparallel* to enable calculations on a cluster:
 ```python
 import ipyparallel
 
-runner = Runner(learner, goal, executor=ipyparallel.Client())
+runner = Runner(learner, loss_goal=0.01, executor=ipyparallel.Client())
 ```
 If the above code is run in a Jupyter notebook it will not block.
-Adaptive takes advantage of the capabilities of the IPython to execute concurrently with the Python kernel.
+Adaptive takes advantage of the capabilities of IPython to execute concurrently with the Python kernel.
 This means that as the calculation is in progress the data is accessible without race conditions via `learner.data`, and can be plotted with `learner.plot()`.
 Additionally, in a Jupyter notebook environment, we can call `runner.live_info()` to display useful information about the ongoing calculation.
 
@@ -462,11 +471,12 @@ def ring(xy): # pretend this is a slow function
     a = 0.2
     return x + np.exp(-(x**2 + y**2 - 0.75**2)**2/a**4)
 
-learner = adaptive.LearnerND(ring, bounds=[(-1, 1), (-1, 1)])
-runner = Runner(learner, goal)
+learner = LearnerND(ring, bounds=[(-1, 1), (-1, 1)])
+runner = Runner(learner, loss_goal=0.01)
 ```
 
 Again, it is possible to specify a custom loss function using the `loss_per_simplex` argument.
+The pure-Python triangulation that backs the `LearnerND` can optionally be replaced by a Rust implementation (the `adaptive-triangulation` package), aimed at reducing $t_\textrm{suggest}$ when the number of points becomes large.
 
 #### The BalancingLearner can run many learners simultaneously.
 Frequently, more than one function (learner) needs to run at once, to do this we have implemented the `BalancingLearner`, which does not take a function, but a list of learners.
@@ -479,26 +489,28 @@ from adaptive import BalancingLearner
 def f(x, pow):
     return x**pow
 
-learners = [Learner1D(partial(f, pow=i)), bounds=(-10, 10) for i in range(2, 10)]
+learners = [Learner1D(partial(f, pow=i), bounds=(-10, 10)) for i in range(2, 10)]
 bal_learner = BalancingLearner(learners)
-runner = Runner(bal_learner, goal)
+runner = Runner(bal_learner, loss_goal=0.01)
 ```
 For more details on how to use Adaptive, we recommend reading the tutorial inside the documentation [@Nijholt2018].
 
 # Possible extensions
 
-#### Anisotropic triangulation would improve the algorithm.
+#### Anisotropic triangulation may improve the algorithm.
 One of the fundamental operations in the adaptive algorithm is selecting a point from within a subdomain.
-The current implementation uses simplices for subdomains (triangles in 2D, tetrahedrons in 3D), and picks a point either (1) in the center of the simplex or (2) on the longest edge of the simplex.
+The basic implementation uses simplices for subdomains (triangles in 2D, tetrahedrons in 3D), and picks a point either (1) in the center of the simplex or (2) on the longest edge of the simplex.
 The choice depends on the shape of the simplex; the center is only used if using the longest edge would produce unacceptably thin simplices.
-A better strategy may be to choose points on the edge of a simplex such that the simplex aligns with the gradient of the function, creating an anisotropic triangulation [@Dyn1990].
-This is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
+A better strategy may be to choose points such that the simplices align with the gradient of the function, creating an anisotropic triangulation [@Dyn1990]; this is a similar approach to the anisotropic meshing techniques mentioned in the literature review.
+The `LearnerND` implements this strategy as an opt-in feature (`anisotropic=True`), stretching the triangulation along the local gradient when choosing new points.
+It is currently limited to scalar-valued functions, and we have not yet quantified its benefit; extending it to vector-valued functions and benchmarking it remain future work.
 
 #### Learning stochastic functions is a promising direction.
 Stochastic processes frequently appear in numerical sciences.
 Currently, Adaptive has an `AverageLearner` that samples a random variable (modelled as a function that takes no parameters and returns a different value each time it is called) until the mean is known to within a certain standard error.
 This is advantageous because no predetermined number of samples has to be set before starting the simulation.
-Extending this learner to be able to deal with stochastic functions in arbitrary dimensions would be a useful addition.
+Additionally, the `AverageLearner1D` learns stochastic functions of one variable, deciding at each step whether to sample a new point or to resample an existing point to reduce the uncertainty of its estimated mean.
+Extending these learners to be able to deal with stochastic functions in arbitrary dimensions would be a useful addition.
 
 #### Experimental control needs to deal with noise, hysteresis, and the cost for changing parameters.
 Finally, there is the potential to use Adaptive for experimental control.
